@@ -1,0 +1,31 @@
+{
+  "name": "raw-socket",
+  "version": "0.0.1",
+  "description": "Raw sockets for Node.js.",
+  "main": "index.js",
+  "directories": {
+    "example": "example"
+  },
+  "dependencies": {},
+  "contributors": [ 
+    {
+      "name": "Stephen Vickers",
+      "email": "stephen.vickers.sv@gmail.com"
+    } 
+  ],
+  "repository": {
+    "type": "mercurial",
+    "url": "https://bitbucket.org/stephenwvickers/node-raw-socket"
+  },
+  "keywords": [
+  	 "net",
+  	 "network",
+    "raw",
+    "raw-socket",
+    "raw-sockets",
+    "socket",
+    "sockets"
+  ],
+  "author": "Stephen Vickers <stephen.vickers.sv@gmail.com>",
+  "license": "GPL"
+}
