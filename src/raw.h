@@ -9,8 +9,8 @@
  **  - no definition for inline function 'v8::Persistent<T> \
  **       v8::Persistent<T>::New(v8::Handle<T>)'
  **
- ** I've not yet worked out whether they are an issue or not so for now we've
- ** added the following for win32 to disable these warnings.
+ ** There don't seem to be any issues which would suggest these are real
+ ** problems, so we've disabled them for now.
  **/
 #ifdef _WIN32
 #pragma warning(disable:4506;disable:4530)
@@ -22,6 +22,7 @@
 
 #ifdef _WIN32
 #include <winsock2.h>
+#define SOCKET_ERRNO WSAGetLastError()
 #else
 #include <errno.h>
 #define SOCKET int
