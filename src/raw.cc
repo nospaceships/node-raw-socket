@@ -1,10 +1,6 @@
 #ifndef RAW_CC
 #define RAW_CC
 
-#ifdef _WIN32
-#define SOCKET_ERRNO WSAGetLastError()
-#endif
-
 #include <node.h>
 #include <node_buffer.h>
 
@@ -161,7 +157,7 @@ Handle<Value> SocketWrap::New (const Arguments& args) {
 	
 	if (args.Length () < 1) {
 		ThrowException (Exception::Error (String::New (
-				"Two arguments are required")));
+				"One argument is required")));
 		return scope.Close (args.This ());
 	}
 	
