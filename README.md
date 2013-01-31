@@ -5,7 +5,7 @@ This module implements raw sockets for [Node.js][nodejs].
 
 *This module has been created primarily to implement another, separate module,
 for the purpose of sending ICMP echo (ping) requests to many hosts at once.
-That module will be available shortly*
+That module will be available shortly.*
 
 This module is installed using [node package manager (npm)][npm]:
 
@@ -148,7 +148,8 @@ The following arguments will be passed to the `callback` function:
  * `buffer` - A [Node.js][nodejs] `Buffer` object containing the data
    received, the buffer will be sized to fit the data received, that is the
    `length` attribute of buffer will specify how many bytes were received
- * `source` - Source IP address of the message, e.g "192.168.1.254"
+ * `address` - Dotted quad formatted source IP address of the message, e.g
+   "192.168.1.254"
 
 The following example prints received messages in hexadecimal to the console:
 
@@ -162,13 +163,11 @@ The following example prints received messages in hexadecimal to the console:
 The `send()` method sends data to a remote host.
 
 The `buffer` parameter is a [Node.js][nodejs] `Buffer` object containing the
-data to be sent.  The `offset` parameter specifies how many bytes to index
-into `buffer` when sending data.  The `length` parameter specifies how many
-bytes from `buffer`, beginning at offset `offset`, to send.  The `address`
-parameter contains the dotted quad formatted IP address of the remote host to
-send the data to.  The `callback` function is called once the specified data
-has been sent.  The following arguments will be passed to the `callback`
-function:
+data to be sent.  The `length` parameter specifies how many bytes from
+`buffer`, beginning at offset `offset`, to send.  The `address` parameter
+contains the dotted quad formatted IP address of the remote host to send the
+data to.  The `callback` function is called once the data has been sent.  The
+following arguments will be passed to the `callback` function:
 
  * `error` - Instance of the `Error` class, or `null` if no error occurred
  * `bytes` - Number of bytes sent
@@ -211,11 +210,14 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
  * Move `SOCKET_ERRNO` define from `raw.cc` to `raw.h`
  * Error in exception thrown by `SocketWrap::New` in `raw.cc` stated that two
    arguments were required, this should be one
+ * Corrections to the README.md
 
 # Roadmap
 
 In no particular order:
 
+ * Enhance performance by moving the send queue into the C++ raw::SocketWrap
+   class
  * Support `IP_HDRINCL` socket option
  * Support IPv6
 
