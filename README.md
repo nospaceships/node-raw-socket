@@ -205,7 +205,7 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
 
  * Initial release
 
-## Version 1.0.1 - ?
+## Version 1.0.1 - 01/02/2013
 
  * Move `SOCKET_ERRNO` define from `raw.cc` to `raw.h`
  * Error in exception thrown by `SocketWrap::New` in `raw.cc` stated that two
