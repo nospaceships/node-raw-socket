@@ -44,6 +44,40 @@ The raw sockets exposed by this module support IPv4 (soon to include IPv6).
 Raw sockets are created using the operating systems `socket()` function, and
 the socket type `SOCK_RAW` specified.
 
+# Automatic Checksum Generation
+
+This module offers the ability to automatically generate checksums in C++.
+This offers a performance benefit over generating checksums in JavaScript.
+This can be used to generate checksums for UDP, TCP and ICMP packets, for
+example.
+
+Checksums produced by this module are 16 bits long, which falls in line with
+the checksums required for UDP, TCP and ICMP.
+
+To enable automatic checksum generation specify the `generateChecksums` and
+`checksumOffset` parameters to the `createSocket()` method exposed by this
+module.
+
+For example this module can be instructed to automatically generate ICMP
+checksums.  ICMP checksums are located in bytes 3 and 4 of ICMP packets.
+Offsets start from 0 so we must specify 2 when creating our socket:
+
+    var options = {
+        protocol: raw.Protocol.ICMP,
+        generateChecksums: true,
+        checksumOffset: 2
+    };
+
+    var socket = raw.createSocket (options);
+
+When ICMP packets are sent using the created socket a 16 bit checksum will be
+generated and placed into bytes 3 and 4 before the packet is sent.
+
+Automatic checksum generation can be disabled after socket creation using the
+`generateChecksums()` method exposed by the `Socket` class:
+
+    socket.generateChecksums (false).send (...).generateChecksums (true, 2);
+
 # Constants
 
 The following sections describe constants exported and used by this module.
@@ -76,7 +110,9 @@ The `createSocket()` function instantiates and returns an instance of the
     // Default options
     var options = {
         protocol: raw.Protocol.ICMP,
-        bufferSize: 4096
+        bufferSize: 4096,
+        generateChecksums: false,
+        checksumOffset: 0
     };
     
     var socket = raw.createSocket (options);
@@ -89,6 +125,11 @@ items:
    consant `raw.Protocol.None`
  * `bufferSize` - Size, in bytes, of the sockets internal receive buffer,
    defaults to 4096
+ * `generateChecksums` - Either `true` or `false` to enable or disable the
+   automatic checksum generation feature, defaults to `false`
+ * `checksumOffset` - When `generateChecksums` is `true` specifies how many
+   bytes to index into the send buffer to write automatically generated
+   checksums, defaults to `0`
 
 An exception will be thrown if the underlying raw socket could not be created.
 The error will be an instance of the `Error` class.
@@ -158,7 +199,22 @@ The following example prints received messages in hexadecimal to the console:
                 + ": " + buffer.toString ("hex"));
     });
 
-## raw.send (buffer, offset, length, address, callback)
+## socket.generateChecksums (generate, offset)
+
+The `generateChecksums()` method is used to specify whether automatic checksum
+generation should be performed by the socket.
+
+The `generate` parameter is either `true` or `false` to enable or disable the
+feature.  The optional `offset` parameter specifies how many bytes to index
+into the send buffer when writing the generated checksum to the send buffer.
+
+The following example enables automatic checksum generation at offset 2
+resulting in checksums being written to byte 3 and 4 of the send buffer
+(offsets start from 0, meaning byte 1):
+
+    socket.generateChecksums (true, 2);
+
+## socket.send (buffer, offset, length, address, callback)
 
 The `send()` method sends data to a remote host.
 
@@ -213,6 +269,10 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
  * Corrections to the README.md
  * Missing includes causes compilation error on some systems (maybe Node
    version dependant)
+
+## Version 1.0.2 - 02/02/2013
+
+ * Support automatic checksum generation
 
 # Roadmap
 
