@@ -60,7 +60,7 @@ module.
 
 For example this module can be instructed to automatically generate ICMP
 checksums.  ICMP checksums are located in bytes 3 and 4 of ICMP packets.
-Offsets start from 0 so we must specify 2 when creating our socket:
+Offsets start from 0 so 2 must be specified when creating the socket:
 
     var options = {
         protocol: raw.Protocol.ICMP,
