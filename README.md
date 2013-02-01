@@ -211,6 +211,8 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
  * Error in exception thrown by `SocketWrap::New` in `raw.cc` stated that two
    arguments were required, this should be one
  * Corrections to the README.md
+ * Missing includes causes complication error on some systems (maybe Node
+   version dependant)
 
 # Roadmap
 
