@@ -25,6 +25,12 @@
 #define SOCKET_ERRNO WSAGetLastError()
 #else
 #include <errno.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <fcntl.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #define SOCKET int
 #define SOCKET_ERROR -1
 #define SOCKET_ERRNO errno
