@@ -56,11 +56,15 @@ private:
 	void CloseSocket (void);
 	int CreateSocket (void);
 	
+	static Handle<Value> GenerateChecksums (const Arguments& args);
 	static Handle<Value> New (const Arguments& args);
 	static Handle<Value> Recv (const Arguments& args);
 	static Handle<Value> Send (const Arguments& args);
 	static Handle<Value> StopSendReady (const Arguments& args);
 	static Handle<Value> StartSendReady (const Arguments& args);
+	
+	bool generate_checksums_;
+	unsigned int checksum_offset_;
 	
 	uint32_t protocol_;
 	

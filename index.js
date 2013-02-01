@@ -38,6 +38,11 @@ function Socket (options) {
 					? options.protocol
 					: 0);
 	
+	if (options && options.generateChecksums) {
+		offset = options.checksumOffset || 0;
+		this.generateChecksums (true, offset);
+	}
+	
 	var me = this;
 	this.wrap.on ("sendReady", this.onSendReady.bind (me));
 	this.wrap.on ("recvReady", this.onRecvReady.bind (me));
@@ -49,6 +54,11 @@ util.inherits (Socket, events.EventEmitter);
 
 Socket.prototype.close = function () {
 	this.wrap.close ();
+	return this;
+}
+
+Socket.prototype.generateChecksums = function (generate, offset) {
+	this.wrap.generateChecksums ((generate ? true : false), (offset || 0));
 	return this;
 }
 
