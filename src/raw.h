@@ -22,6 +22,7 @@
 
 #ifdef _WIN32
 #include <winsock2.h>
+#include <Ws2tcpip.h>
 #define SOCKET_ERRNO WSAGetLastError()
 #else
 #include <errno.h>
@@ -66,6 +67,7 @@ private:
 	bool generate_checksums_;
 	unsigned int checksum_offset_;
 	
+	uint32_t family_;
 	uint32_t protocol_;
 	
 	SOCKET poll_fd_;
