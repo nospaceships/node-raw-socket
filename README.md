@@ -3,9 +3,8 @@
 
 This module implements raw sockets for [Node.js][nodejs].
 
-*This module has been created primarily to implement another, separate module,
-for the purpose of sending ICMP echo (ping) requests to many hosts at once.
-That module will be available shortly.*
+*This module has been created primarily to facilitate implementation of the
+[net-ping][net-ping] module.*
 
 This module is installed using [node package manager (npm)][npm]:
 
@@ -35,6 +34,7 @@ Raw sockets can then be created, and data sent using [Node.js][nodejs]
 
 [homepage]: http://re-tool.org "Homepage"
 [nodejs]: http://nodejs.org "Node.js"
+[net-ping]: https://npmjs.org/package/net-ping "net-ping"
 [npm]: https://npmjs.org/ "npm"
 
 # Network Protocol Support
@@ -273,6 +273,13 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
 ## Version 1.0.2 - 02/02/2013
 
  * Support automatic checksum generation
+
+## Version 1.0.3 - ?
+
+ * The [net-ping][net-ping] module is now implemented so update the note about
+   it in the first section of the README.md
+
+[net-ping]: https://npmjs.org/package/net-ping "net-ping"
 
 # Roadmap
 
