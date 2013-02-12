@@ -11,11 +11,19 @@ function _expandConstantObject (object) {
 		object[object[keys[i]]] = parseInt (keys[i]);
 }
 
+var AddressFamily = {
+	1: "IPv4",
+	2: "IPv6"
+};
+
+_expandConstantObject (AddressFamily);
+
 var Protocol = {
 	0: "None",
 	1: "ICMP",
 	6: "TCP",
-	17: "UDP"
+	17: "UDP",
+	58: "ICMPv6"
 };
 
 _expandConstantObject (Protocol);
@@ -34,9 +42,13 @@ function Socket (options) {
 	this.sending = false;
 	
 	this.wrap = new raw.SocketWrap (
-			(options && options.protocol)
+			((options && options.protocol)
 					? options.protocol
-					: 0);
+					: 0),
+			((options && options.addressFamily)
+					? options.addressFamily
+					: AddressFamily.IPv4)
+		);
 	
 	if (options && options.generateChecksums) {
 		offset = options.checksumOffset || 0;
@@ -138,6 +150,7 @@ exports.createSocket = function (options) {
 	return new Socket (options || {});
 };
 
+exports.AddressFamily = AddressFamily;
 exports.Protocol = Protocol;
 
 exports.Socket = Socket;

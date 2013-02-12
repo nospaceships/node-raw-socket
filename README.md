@@ -39,10 +39,22 @@ Raw sockets can then be created, and data sent using [Node.js][nodejs]
 
 # Network Protocol Support
 
-The raw sockets exposed by this module support IPv4 (soon to include IPv6).
+The raw sockets exposed by this module support IPv4 and IPv6.
 
 Raw sockets are created using the operating systems `socket()` function, and
 the socket type `SOCK_RAW` specified.
+
+# Raw Socket Behaviour
+
+Raw sockets behave in different ways depending on operating system and
+version.  The appropriate operating system documentation should be consulted
+to understand how raw sockets will behave before attempting to use this
+module.
+
+Some operating system versions may also restict the use of raw sockets to
+privileged users.  If this is the case an exception will be thrown on socket
+creation using a message similar to `Operation not permitted` (this message
+is likely to be different depending on operating system version).
 
 # Automatic Checksum Generation
 
@@ -82,6 +94,17 @@ Automatic checksum generation can be disabled after socket creation using the
 
 The following sections describe constants exported and used by this module.
 
+## raw.AddressFamily
+
+This object contains constants which can be used for the `addressFamily`
+option to the `createSocket()` function exposed by this module.  This option
+specifies the IP protocol version to use when creating the raw socket.
+
+The following constants are defined in this object:
+
+ * `IPv4` - IPv4 protocol
+ * `IPv6` - IPv6 protocol
+
 ## raw.Protocol
 
 This object contains constants which can be used for the `protocol` option to
@@ -95,6 +118,7 @@ The following constants are defined in this object:
  * `ICMP` - protocol number 1
  * `TCP` - protocol number 6
  * `UDP` - protocol number 17
+ * `ICMPv6` - protocol number 58
 
 # Using This Module
 
@@ -109,6 +133,7 @@ The `createSocket()` function instantiates and returns an instance of the
 
     // Default options
     var options = {
+        addressFamily: raw.AddressFamily.IPv4,
         protocol: raw.Protocol.ICMP,
         bufferSize: 4096,
         generateChecksums: false,
@@ -120,6 +145,9 @@ The `createSocket()` function instantiates and returns an instance of the
 The optional `options` parameter is an object, and can contain the following
 items:
 
+ * `addressFamily` - Either the constant `raw.AddressFamily.IPv4` or the
+   constant `raw.AddressFamily.IPv6`, defaults to the constant
+   `raw.AddressFamily.IPv4`
  * `protocol` - Either one of the constants defined in the `raw.Protocol`
    object or the protocol number to use for the socket, defaults to the
    consant `raw.Protocol.None`
@@ -189,8 +217,10 @@ The following arguments will be passed to the `callback` function:
  * `buffer` - A [Node.js][nodejs] `Buffer` object containing the data
    received, the buffer will be sized to fit the data received, that is the
    `length` attribute of buffer will specify how many bytes were received
- * `address` - Dotted quad formatted source IP address of the message, e.g
-   "192.168.1.254"
+ * `address` - For IPv4 raw sockets the dotted quad formatted source IP
+   address of the message, e.g `192.168.1.254`, for IPv6 raw sockets the
+   compressed formatted source IP address of the message, e.g.
+   `fe80::a00:27ff:fe2a:3427`
 
 The following example prints received messages in hexadecimal to the console:
 
@@ -220,10 +250,13 @@ The `send()` method sends data to a remote host.
 
 The `buffer` parameter is a [Node.js][nodejs] `Buffer` object containing the
 data to be sent.  The `length` parameter specifies how many bytes from
-`buffer`, beginning at offset `offset`, to send.  The `address` parameter
-contains the dotted quad formatted IP address of the remote host to send the
-data to.  The `callback` function is called once the data has been sent.  The
-following arguments will be passed to the `callback` function:
+`buffer`, beginning at offset `offset`, to send.  For IPv4 raw sockets the
+`address` parameter contains the dotted quad formatted IP address of the
+remote host to send the data to, e.g `192.168.1.254`, for IPv6 raw sockets the
+`address` parameter contains the compressed formatted IP address of the remote
+host to send the data to, e.g. `fe80::a00:27ff:fe2a:3427`.  The `callback`
+function is called once the data has been sent.  The following arguments will
+be passed to the `callback` function:
 
  * `error` - Instance of the `Error` class, or `null` if no error occurred
  * `bytes` - Number of bytes sent
@@ -274,10 +307,11 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
 
  * Support automatic checksum generation
 
-## Version 1.0.3 - ?
+## Version 1.1.0 - ?
 
  * The [net-ping][net-ping] module is now implemented so update the note about
    it in the first section of the README.md
+ * Support IPv6
 
 [net-ping]: https://npmjs.org/package/net-ping "net-ping"
 
@@ -288,7 +322,6 @@ In no particular order:
  * Enhance performance by moving the send queue into the C++ raw::SocketWrap
    class
  * Support `IP_HDRINCL` socket option
- * Support IPv6
 
 Suggestions and requirements should be sent to <stephen.vickers.sv@gmail.com>.
 

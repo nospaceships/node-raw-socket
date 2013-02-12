@@ -98,7 +98,7 @@ int SocketWrap::CreateSocket (void) {
 	if (this->poll_initialised_)
 		return 0;
 	
-	if ((this->poll_fd_ = socket (AF_INET, SOCK_RAW, this->protocol_))
+	if ((this->poll_fd_ = socket (this->family_, SOCK_RAW, this->protocol_))
 			== INVALID_SOCKET)
 		return SOCKET_ERRNO;
 
@@ -187,7 +187,7 @@ void SocketWrap::HandleIOEvent (int status, int revents) {
 Handle<Value> SocketWrap::New (const Arguments& args) {
 	HandleScope scope;
 	SocketWrap* socket = new SocketWrap ();
-	int rc;
+	int rc, family = AF_INET;
 	
 	if (args.Length () < 1) {
 		ThrowException (Exception::Error (String::New (
@@ -202,6 +202,19 @@ Handle<Value> SocketWrap::New (const Arguments& args) {
 	} else {
 		socket->protocol_ = args[0]->ToUint32 ()->Value ();
 	}
+
+	if (args.Length () > 1) {
+		if (! args[1]->IsUint32 ()) {
+			ThrowException (Exception::TypeError (String::New (
+					"Address family argument must be an unsigned integer")));
+			return scope.Close (args.This ());
+		} else {
+			if (args[1]->ToUint32 ()->Value () == 2)
+				family = AF_INET6;
+		}
+	}
+	
+	socket->family_ = family;
 	
 	socket->poll_initialised_ = false;
 	
@@ -223,11 +236,17 @@ Handle<Value> SocketWrap::Recv (const Arguments& args) {
 	SocketWrap* socket = SocketWrap::Unwrap<SocketWrap> (args.This ());
 	Local<Object> buffer;
 	sockaddr_in sin_address;
+	sockaddr_in6 sin6_address;
+	char addr[50];
 	int rc;
 #ifdef _WIN32
-	int sin_length = sizeof (sin_address);
+	int sin_length = socket->family_ == AF_INET6
+			? sizeof (sin6_address)
+			: sizeof (sin_address);
 #else
-	socklen_t sin_length = sizeof (sin_address);
+	socklen_t sin_length = socket->family_ == AF_INET6
+			? sizeof (sin6_address)
+			: sizeof (sin_address);
 #endif
 	
 	if (args.Length () < 2) {
@@ -256,23 +275,35 @@ Handle<Value> SocketWrap::Recv (const Arguments& args) {
 		return scope.Close (args.This ());
 	}
 
-	memset (&sin_address, 0, sizeof (sin_address));
+	if (socket->family_ == AF_INET6) {
+		memset (&sin6_address, 0, sizeof (sin6_address));
+		rc = recvfrom (socket->poll_fd_, node::Buffer::Data (buffer),
+				(int) node::Buffer::Length (buffer), 0, (sockaddr *) &sin6_address,
+				&sin_length);
+	} else {
+		memset (&sin_address, 0, sizeof (sin_address));
+		rc = recvfrom (socket->poll_fd_, node::Buffer::Data (buffer),
+				(int) node::Buffer::Length (buffer), 0, (sockaddr *) &sin_address,
+				&sin_length);
+	}
 	
-	rc = recvfrom (socket->poll_fd_, node::Buffer::Data (buffer),
-			(int) node::Buffer::Length (buffer), 0, (sockaddr *) &sin_address,
-			&sin_length);
 	if (rc == SOCKET_ERROR) {
 		ThrowException (Exception::Error (String::New (raw_strerror (
 				SOCKET_ERRNO))));
 		return scope.Close (args.This ());
 	}
 	
+	if (socket->family_ == AF_INET6)
+		uv_ip6_name (&sin6_address, addr, 50);
+	else
+		uv_ip4_name (&sin_address, addr, 50);
+	
 	Local<Function> cb = Local<Function>::Cast (args[1]);
 	const unsigned argc = 3;
 	Local<Value> argv[argc];
 	argv[0] = args[0];
 	argv[1] = Number::New (rc);
-	argv[2] = String::New (inet_ntoa (sin_address.sin_addr));
+	argv[2] = String::New (addr);
 	cb->Call (Context::GetCurrent ()->Global (), argc, argv);
 	
 	return scope.Close (args.This ());
@@ -302,7 +333,6 @@ Handle<Value> SocketWrap::Send (const Arguments& args) {
 	Local<Object> buffer;
 	uint32_t offset;
 	uint32_t length;
-	sockaddr_in sin_address;
 	int rc;
 	unsigned int sum;
 	char *data;
@@ -354,11 +384,6 @@ Handle<Value> SocketWrap::Send (const Arguments& args) {
 	length = args[2]->ToUint32 ()->Value ();
 	String::AsciiValue address (args[3]);
 
-	memset (&sin_address, 0, sizeof (sin_address));
-	sin_address.sin_family = AF_INET;
-	sin_address.sin_port = htons (0);
-	sin_address.sin_addr.s_addr = inet_addr (*address);
-	
 	data = node::Buffer::Data (buffer) + offset;
 	
 	if (socket->generate_checksums_) {
@@ -375,8 +400,15 @@ Handle<Value> SocketWrap::Send (const Arguments& args) {
 		}
 	}
 	
-	rc = sendto (socket->poll_fd_, data, length,
-			0, (sockaddr *) &sin_address, sizeof (sin_address));
+	if (socket->family_ == AF_INET6) {
+		struct sockaddr_in6 addr = uv_ip6_addr (*address, 0);
+		rc = sendto (socket->poll_fd_, data, length, 0,
+				(struct sockaddr *) &addr, sizeof (addr));
+	} else {
+		struct sockaddr_in addr = uv_ip4_addr (*address, 0);
+		rc = sendto (socket->poll_fd_, data, length, 0,
+				(struct sockaddr *) &addr, sizeof (addr));
+	}
 	
 	// Zero out the checksum again, in case it needs to be re-used...
 	if (socket->generate_checksums_) {
