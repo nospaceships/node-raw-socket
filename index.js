@@ -55,6 +55,9 @@ function Socket (options) {
 		this.generateChecksums (true, offset);
 	}
 	
+	if (options && options.noIpHeader)
+		this.noIpHeader (true);
+	
 	var me = this;
 	this.wrap.on ("sendReady", this.onSendReady.bind (me));
 	this.wrap.on ("recvReady", this.onRecvReady.bind (me));
@@ -71,6 +74,11 @@ Socket.prototype.close = function () {
 
 Socket.prototype.generateChecksums = function (generate, offset) {
 	this.wrap.generateChecksums ((generate ? true : false), (offset || 0));
+	return this;
+}
+
+Socket.prototype.noIpHeader = function (noHeader) {
+	this.wrap.noIpHeader ((noHeader ? true : false));
 	return this;
 }
 
