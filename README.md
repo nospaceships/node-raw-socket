@@ -195,9 +195,6 @@ items:
 An exception will be thrown if the underlying raw socket could not be created.
 The error will be an instance of the `Error` class.
 
-When data is sent using the instantiated raw socket the operating system will
-automatically build IP headers and place them in outgoing packets.
-
 The `protocol` parameter, or its default value of the constant
 `raw.Protocol.None`, will be specified in the protocol field of each IP
 header.
@@ -205,9 +202,6 @@ header.
 Upon receiving packets IP headers are **NOT** removed by the operating system.
 IP headers in received packets will be included in data presented by this
 module.
-
-This module hopes to support the `IP_HDRINCL` socket option in the near
-future, which controls the inclusion of IP headers in outgoing packets.
 
 ## socket.on ("close", callback)
 
