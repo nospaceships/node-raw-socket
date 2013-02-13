@@ -1,5 +1,6 @@
 
 var events = require ("events");
+var net = require ("net");
 var raw = require ("./build/Release/raw");
 var util = require ("util");
 
@@ -124,16 +125,16 @@ Socket.prototype.onSendReady = function () {
 	}
 }
 
-Socket.prototype.send = function (buffer, offset, length, address, callback) {
-	if (! callback) {
-		callback = address;
-		address = undefined;
-	}
-	
+Socket.prototype.send = function (buffer, offset, length, address, callback) {	
 	if (length + offset > buffer.length)  {
 		callback.call (this, new Error ("Buffer length '" + buffer.length
 				+ "' is not large enough for the specified offset '" + offset
 				+ "' plus length '" + length + "'"));
+		return this;
+	}
+	
+	if (! net.isIP (address)) {
+		callback.call (this, new Error ("Invalid IP address '" + address + "'"));
 		return this;
 	}
 	
