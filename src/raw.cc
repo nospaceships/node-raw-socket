@@ -187,8 +187,15 @@ Handle<Value> SocketWrap::NoIpHeader (const Arguments& args) {
 				(const char *) &val, sizeof (val));
 #else
 	int val = socket->no_ip_header_ ? 1 : 0;
-	rc = setsockopt (socket->poll_fd_, IPPROTO_IP, IP_HDRINCL,
-			(void *) &val, sizeof (val));
+	if (socket->family_ == AF_INET6) {
+		ThrowException (Exception::Error (String::New ("The IP_HDRINCL socket "
+				"option is not supported for IPv6 sockets, and this platform "
+				"has no IPV6_HDRINCL socket option")));
+		return scope.Close (args.This ());
+	} else {	
+		rc = setsockopt (socket->poll_fd_, IPPROTO_IP, IP_HDRINCL,
+				(void *) &val, sizeof (val));
+	}
 #endif
 
 	if (rc == SOCKET_ERROR) {
