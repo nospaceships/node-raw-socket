@@ -347,6 +347,10 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
    `createSocket()` function and the `noIpHeader()` method exposed by the
    `Socket` class
 
+## Version 1.1.1 - 14/02/2013
+
+ * IP addresses not being validated
+
 [net-ping]: https://npmjs.org/package/net-ping "net-ping"
 
 # Roadmap
