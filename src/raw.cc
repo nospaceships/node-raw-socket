@@ -55,6 +55,7 @@ void SocketWrap::Init (Handle<Object> target) {
 	
 	NODE_SET_PROTOTYPE_METHOD(tpl, "close", Close);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "generateChecksums", GenerateChecksums);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "noIpHeader", NoIpHeader);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "recv", Recv);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "send", Send);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "startSendReady", StartSendReady);
@@ -157,6 +158,48 @@ Handle<Value> SocketWrap::GenerateChecksums (const Arguments& args) {
 	return scope.Close (args.This ());
 }
 
+Handle<Value> SocketWrap::NoIpHeader (const Arguments& args) {
+	HandleScope scope;
+	SocketWrap* socket = SocketWrap::Unwrap<SocketWrap> (args.This ());
+	int rc;
+	
+	if (args.Length () < 1) {
+		ThrowException (Exception::Error (String::New (
+				"At least one argument is required")));
+		return scope.Close (args.This ());
+	}
+	
+	if (! args[0]->IsBoolean ()) {
+		ThrowException (Exception::TypeError (String::New (
+				"noHeader argument must be a boolean")));
+		return scope.Close (args.This ());
+	} else {
+		socket->no_ip_header_ = args[0]->ToBoolean ()->Value ();
+	}
+
+#ifdef _WIN32
+	DWORD val = socket->no_ip_header_ ? FALSE : FALSE;
+	if (socket->family_ == AF_INET6)
+		rc = setsockopt (socket->poll_fd_, IPPROTO_IPV6, IPV6_HDRINCL,
+				(const char *) &val, sizeof (val));
+	else
+		rc = setsockopt (socket->poll_fd_, IPPROTO_IP, IP_HDRINCL,
+				(const char *) &val, sizeof (val));
+#else
+	int val = socket->no_ip_header_ ? 1 : 0;
+	rc = setsockopt (socket->poll_fd_, IPPROTO_IP, IP_HDRINCL,
+			(void *) &val, sizeof (val));
+#endif
+
+	if (rc == SOCKET_ERROR) {
+		ThrowException (Exception::Error (String::New (
+				raw_strerror (SOCKET_ERRNO))));
+		return scope.Close (args.This ());
+	}
+
+	return scope.Close (args.This ());
+}
+
 void SocketWrap::HandleIOEvent (int status, int revents) {
 	HandleScope scope;
 
@@ -219,6 +262,8 @@ Handle<Value> SocketWrap::New (const Arguments& args) {
 	socket->poll_initialised_ = false;
 	
 	socket->generate_checksums_ = false;
+	
+	socket->no_ip_header_ = false;
 
 	rc = socket->CreateSocket ();
 	if (rc != 0) {
