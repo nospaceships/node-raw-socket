@@ -344,7 +344,7 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
 
  * Support automatic checksum generation
 
-## Version 1.1.0 - ?
+## Version 1.1.0 - 13/02/2013
 
  * The [net-ping][net-ping] module is now implemented so update the note about
    it in the first section of the README.md
