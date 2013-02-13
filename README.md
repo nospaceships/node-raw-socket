@@ -199,9 +199,10 @@ The `protocol` parameter, or its default value of the constant
 `raw.Protocol.None`, will be specified in the protocol field of each IP
 header.
 
-Upon receiving packets IP headers are **NOT** removed by the operating system.
-IP headers in received packets will be included in data presented by this
-module.
+Upon receiving packets IP headers are **NOT** removed by the operating system
+when using IPv4 raw socket and IP headers in received packets will be included
+in data presented by this module.  When using IPv6 raw sockets IP headers are
+**NOT** included in data presented by this module.
 
 ## socket.on ("close", callback)
 
