@@ -63,16 +63,19 @@ understand how raw sockets will behave before attempting to use this module.
 
 # Automatic IP Header Generation
 
-When sending packets over raw sockets the operating system will automatically
-build IP header and place it in the outgoing packet ahead of the data to be
-sent.
+When sending a packet over a raw socket the operating system will
+automatically build an IP header and place it in the outgoing packet ahead of
+the data to be sent.
 
 This module offers the ability to disable this behavior.  When disabled IP
 headers must be created and included in data sent using a raw socket.
 
-The socket option `IP_HDRINCL` is used to disable this feature (the
-`IPV6_HDRINCL` socket option is used for IPv6 raw sockets on Windows
-platforms).
+This feature is supported on all platforms for IPv4 raw sockets by utilising
+the socket option `IP_HDRINCL`.
+
+This feature is only supported on Windows platforms for IPv6 raw sockets by
+utilising the socket option `IPV6_HDRINCL` - similar options for other
+platforms are yet to be discovered.
 
 To enable this feature specify the `noIpHeader` parameter to the
 `createSocket()` method exposed by this module.
