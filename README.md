@@ -163,7 +163,7 @@ The `createSocket()` function instantiates and returns an instance of the
     // Default options
     var options = {
         addressFamily: raw.AddressFamily.IPv4,
-        protocol: raw.Protocol.ICMP,
+        protocol: raw.Protocol.None,
         noIpHeader: false,
         bufferSize: 4096,
         generateChecksums: false,
@@ -252,7 +252,7 @@ The following arguments will be passed to the `callback` function:
 
 The following example prints received messages in hexadecimal to the console:
 
-    socket.on ("message", function (message, address) {
+    socket.on ("message", function (buffer, address) {
         console.log ("received " + buffer.length + " bytes from " + address
                 + ": " + buffer.toString ("hex"));
     });
@@ -365,6 +365,10 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
 ## Version 1.1.1 - 14/02/2013
 
  * IP addresses not being validated
+
+## Version 1.1.2 - 15/02/2013
+
+ * 
 
 [net-ping]: https://npmjs.org/package/net-ping "net-ping"
 
