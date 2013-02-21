@@ -368,9 +368,9 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
 
 ## Version 1.1.2 - 15/02/2013
 
- * Default protocol option to createSession() was incorrect in the README.md
- * session.on("message") example used message instead of buffer in the
-   README.md
+ * Default protocol option to `createSession()` was incorrect in the README.md
+ * The `session.on("message")` example used `message` instead of `buffer` in
+   the README.md
 
 [net-ping]: https://npmjs.org/package/net-ping "net-ping"
 
