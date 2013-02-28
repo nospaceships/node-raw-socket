@@ -378,6 +378,7 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
 
 In no particular order:
 
+ * Support some socket options
  * Enhance performance by moving the send queue into the C++ raw::SocketWrap
    class
 
