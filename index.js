@@ -114,7 +114,7 @@ Socket.prototype.onSendReady = function () {
 				req.callback.call (me, null, bytes);
 			});
 		} catch (error) {
-			me.emit ("error", error);
+			req.callback.call (me, error, 0);
 		}
 	} else {
 		if (this.sending) {

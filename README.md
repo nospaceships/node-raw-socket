@@ -372,6 +372,11 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
  * The `session.on("message")` example used `message` instead of `buffer` in
    the README.md
 
+## Version 1.1.3 - ?
+
+ * raw.Socket.onSendReady() emit's an error when raw.SocketWrap.send() throws
+   an exception when it should call the req.callback callback
+
 [net-ping]: https://npmjs.org/package/net-ping "net-ping"
 
 # Roadmap
