@@ -286,6 +286,59 @@ The following example disables automatic IP header generation:
 
     socket.noIpHeader (true);
 
+## socket.pauseRecv () - socket.resumeRecv ()
+
+The `pauseRecv()` method stops the underlying `libuv` `poll_handle_t` from
+generating readable events.
+
+The main purpose of this is to prevent the raw socket from keeping the event
+loop alive, allowing the program to exit if there is nothing else to do.
+
+Socket creation can be expensive on some platforms.  This method offers an
+alternative to closing and deleting a socket to prevent the socket from
+keeping a program running.
+
+The sockets `recvPaused` attribute can be used to determine whether readable
+event generation has been paused.
+
+The following example pauses all readable events if readable events have not
+been paused:
+
+    if (! socket.recvPaused)
+        socket.pauseRecv ();
+
+The `resumeRecv()` method performs the reverse of the `pauseRecv()` method:
+
+    if (socket.recvPaused)
+        socket.resumeRecv ();
+
+## socket.pauseSend () - socket.resumeSend ()
+
+The `pauseSend()` method stops the underlying `libuv` `poll_handle_t` from
+generating writeable events.
+
+The main purpose of this is to prevent the raw socket from keeping the event
+loop alive, allowing the program to exit if there is nothing else to do.
+
+The sockets `sendPaused` attribute can be used to determine whether writeable
+event generation has been paused.
+
+Care should be taken when resuming writable event generation as it can
+generate an overwhelming number of events which could affecting program
+performance.  This method is used by the raw socket itself and programs do
+not normally need to call use the `pauseSend()` and `resumeSend()` methods.
+
+The following example pauses all writeable events if read writeable have not
+been paused:
+
+    if (! socket.recvPaused)
+        socket.pauseRecv ();
+
+The `resumeSend()` method performs the reverse of the `pauseSend()` method.
+
+    if (socket.sendPaused)
+        socket.resumeSend ();
+
 ## socket.send (buffer, offset, length, address, callback)
 
 The `send()` method sends data to a remote host.
@@ -306,6 +359,9 @@ be passed to the `callback` function:
 If the `noIpHeader` option was specified as `true` when creating the socket,
 or the `noIpHeader()` method exposed by the socket has been called with a
 value of `true`, the data to be sent in the `buffer` must include a IP header.
+
+If the sockets `sendPaused` attribute is `true` the `resumeSend()` method will
+be called on the socket so that the data can be sent.
 
 The following example sends a ICMP ping message to a remote host:
 
@@ -372,10 +428,12 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
  * The `session.on("message")` example used `message` instead of `buffer` in
    the README.md
 
-## Version 1.1.3 - ?
+## Version 1.1.3 - 04/03/2013
 
- * raw.Socket.onSendReady() emit's an error when raw.SocketWrap.send() throws
-   an exception when it should call the req.callback callback
+ * `raw.Socket.onSendReady()` emit's an error when `raw.SocketWrap.send()`
+   throws an exception when it should call the `req.callback` callback
+ * Added the `pauseRecv()`, `resumeRecv()`, `pauseSend() and `resumeSend()`
+   methods
 
 [net-ping]: https://npmjs.org/package/net-ping "net-ping"
 

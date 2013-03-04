@@ -58,12 +58,14 @@ private:
 	int CreateSocket (void);
 	
 	static Handle<Value> GenerateChecksums (const Arguments& args);
-	static Handle<Value> NoIpHeader (const Arguments& args);
+	
+	static void OnClose (uv_handle_t *handle);
+	
 	static Handle<Value> New (const Arguments& args);
+	static Handle<Value> NoIpHeader (const Arguments& args);
+	static Handle<Value> Pause (const Arguments& args);
 	static Handle<Value> Recv (const Arguments& args);
 	static Handle<Value> Send (const Arguments& args);
-	static Handle<Value> StopSendReady (const Arguments& args);
-	static Handle<Value> StartSendReady (const Arguments& args);
 	
 	bool generate_checksums_;
 	unsigned int checksum_offset_;

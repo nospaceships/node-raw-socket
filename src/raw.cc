@@ -58,8 +58,7 @@ void SocketWrap::Init (Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(tpl, "noIpHeader", NoIpHeader);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "recv", Recv);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "send", Send);
-	NODE_SET_PROTOTYPE_METHOD(tpl, "startSendReady", StartSendReady);
-	NODE_SET_PROTOTYPE_METHOD(tpl, "stopSendReady", StopSendReady);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "pause", Pause);
 	
 	target->Set (String::NewSymbol ("SocketWrap"), tpl->GetFunction ());
 }
@@ -82,9 +81,14 @@ Handle<Value> SocketWrap::Close (const Arguments& args) {
 void SocketWrap::CloseSocket (void) {
 	HandleScope scope;
 	
-	uv_poll_stop (&this->poll_watcher_);
-	closesocket (this->poll_fd_);
-	this->poll_fd_ = INVALID_SOCKET;
+	if (this->poll_initialised_) {
+		uv_poll_stop (&this->poll_watcher_);
+		closesocket (this->poll_fd_);
+		this->poll_fd_ = INVALID_SOCKET;
+
+		uv_close ((uv_handle_t *) &this->poll_watcher_, OnClose);
+		this->poll_initialised_ = false;
+	}
 
 	Local<Value> emit = this->handle_->Get (EmitSymbol);
 	Local<Function> cb = emit.As<Function> ();
@@ -233,6 +237,10 @@ void SocketWrap::HandleIOEvent (int status, int revents) {
 	}
 }
 
+void SocketWrap::OnClose (uv_handle_t *handle) {
+	// We can re-use the socket so we won't actually do anything here
+}
+
 Handle<Value> SocketWrap::New (const Arguments& args) {
 	HandleScope scope;
 	SocketWrap* socket = new SocketWrap ();
@@ -279,6 +287,39 @@ Handle<Value> SocketWrap::New (const Arguments& args) {
 
 	socket->Wrap (args.This ());
 
+	return scope.Close (args.This ());
+}
+
+Handle<Value> SocketWrap::Pause (const Arguments& args) {
+	HandleScope scope;
+	SocketWrap* socket = SocketWrap::Unwrap<SocketWrap> (args.This ());
+
+	if (args.Length () < 2) {
+		ThrowException (Exception::Error (String::New (
+				"Two arguments are required")));
+		return scope.Close (args.This ());
+	}
+	
+	if (! args[0]->IsBoolean ()) {
+		ThrowException (Exception::TypeError (String::New (
+				"Recv argument must be a boolean")));
+		return scope.Close (args.This ());
+	}
+	bool pause_recv = args[0]->ToBoolean ()->Value ();
+
+	if (! args[0]->IsBoolean ()) {
+		ThrowException (Exception::TypeError (String::New (
+				"Send argument must be a boolean")));
+		return scope.Close (args.This ());
+	}
+	bool pause_send = args[0]->ToBoolean ()->Value ();
+	
+	int events = (pause_recv ? 0 : UV_READABLE)
+			| (pause_send ? 0 : UV_WRITABLE);
+
+	uv_poll_stop (&socket->poll_watcher_);
+	uv_poll_start (&socket->poll_watcher_, events, IoEvent);
+	
 	return scope.Close (args.This ());
 }
 
@@ -478,26 +519,6 @@ Handle<Value> SocketWrap::Send (const Arguments& args) {
 	Local<Value> argv[argc];
 	argv[0] = Number::New (rc);
 	cb->Call (Context::GetCurrent ()->Global (), argc, argv);
-	
-	return scope.Close (args.This ());
-}
-
-Handle<Value> SocketWrap::StartSendReady (const Arguments& args) {
-	HandleScope scope;
-	SocketWrap* socket = SocketWrap::Unwrap<SocketWrap> (args.This ());
-	
-	uv_poll_stop (&socket->poll_watcher_);
-	uv_poll_start (&socket->poll_watcher_, UV_READABLE | UV_WRITABLE, IoEvent);
-	
-	return scope.Close (args.This ());
-}
-
-Handle<Value> SocketWrap::StopSendReady (const Arguments& args) {
-	HandleScope scope;
-	SocketWrap* socket = SocketWrap::Unwrap<SocketWrap> (args.This ());
-	
-	uv_poll_stop (&socket->poll_watcher_);
-	uv_poll_start (&socket->poll_watcher_, UV_READABLE, IoEvent);
 	
 	return scope.Close (args.This ());
 }

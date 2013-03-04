@@ -40,7 +40,9 @@ function Socket (options) {
 	this.buffer = new Buffer ((options && options.bufferSize)
 			? options.bufferSize
 			: 4096);
-	this.sending = false;
+	
+	this.recvPaused = false;
+	this.sendPaused = true;
 	
 	this.wrap = new raw.SocketWrap (
 			((options && options.protocol)
@@ -117,12 +119,33 @@ Socket.prototype.onSendReady = function () {
 			req.callback.call (me, error, 0);
 		}
 	} else {
-		if (this.sending) {
-			this.wrap.stopSendReady ();
-			this.sending = false;
-		}
-			
+		if (! this.sendPaused)
+			this.pauseSend ();
 	}
+}
+
+Socket.prototype.pauseRecv = function () {
+	this.recvPaused = true;
+	this.wrap.pause (this.recvPaused, this.sendPaused);
+	return this;
+}
+
+Socket.prototype.pauseSend = function () {
+	this.sendPaused = true;
+	this.wrap.pause (this.recvPaused, this.sendPaused);
+	return this;
+}
+
+Socket.prototype.resumeRecv = function () {
+	this.recvPaused = false;
+	this.wrap.pause (this.recvPaused, this.sendPaused);
+	return this;
+}
+
+Socket.prototype.resumeSend = function () {
+	this.sendPaused = false;
+	this.wrap.pause (this.recvPaused, this.sendPaused);
+	return this;
 }
 
 Socket.prototype.send = function (buffer, offset, length, address, callback) {	
@@ -147,10 +170,8 @@ Socket.prototype.send = function (buffer, offset, length, address, callback) {
 	};
 	this.requests.push (req);
 	
-	if (! this.sending) {
-		this.wrap.startSendReady ();
-		this.sending = true;
-	}
+	if (this.sendPaused)
+		this.resumeSend ();
 	
 	return this;
 }
