@@ -331,8 +331,8 @@ not normally need to call use the `pauseSend()` and `resumeSend()` methods.
 The following example pauses all writeable events if read writeable have not
 been paused:
 
-    if (! socket.recvPaused)
-        socket.pauseRecv ();
+    if (! socket.sendPaused)
+        socket.pauseSend ();
 
 The `resumeSend()` method performs the reverse of the `pauseSend()` method.
 
