@@ -432,7 +432,7 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
 
  * `raw.Socket.onSendReady()` emit's an error when `raw.SocketWrap.send()`
    throws an exception when it should call the `req.callback` callback
- * Added the `pauseRecv()`, `resumeRecv()`, `pauseSend() and `resumeSend()`
+ * Added the `pauseRecv()`, `resumeRecv()`, `pauseSend()` and `resumeSend()`
    methods
 
 [net-ping]: https://npmjs.org/package/net-ping "net-ping"
