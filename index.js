@@ -148,7 +148,7 @@ Socket.prototype.resumeSend = function () {
 	return this;
 }
 
-Socket.prototype.send = function (buffer, offset, length, address, callback) {	
+Socket.prototype.send = function (buffer, offset, length, address, callback) {
 	if (length + offset > buffer.length)  {
 		callback.call (this, new Error ("Buffer length '" + buffer.length
 				+ "' is not large enough for the specified offset '" + offset

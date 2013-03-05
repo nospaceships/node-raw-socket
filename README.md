@@ -61,6 +61,75 @@ is likely to be different depending on operating system version).
 The appropriate operating system documentation should be consulted to
 understand how raw sockets will behave before attempting to use this module.
 
+# Keeping The [Node.js][nodejs] Event Loop Alive
+
+This module uses the `libuv` library to integrate into the [Node.js][nodejs]
+event loop - this library is also used by [Node.js][nodejs].  An underlying
+ `libuv` library `poll_handle_t` event watcher is used to monitor the underlying operating system raw socket used by a socket object.
+
+All the while a socket object exists, and the sockets `close()` method has not
+been called, the raw socket will keep the [Node.js][nodejs] event loop alive
+which will prevent a program from exiting.
+
+This module exports four methods which a program can use to control this
+behaviour.
+
+The `pauseRecv()` and `pauseSend()` methods stop the underlying `poll_handle_t`
+event watcher used by a socket from monitoring for readable and writeable
+events.  While the `resumeRecv()` and `resumeSend()` methods start the
+underlying `poll_handle_t` event watcher used by a socket allowing it to
+monitor for readable and writeable events.
+
+Each socket object also exports the `recvPaused` and `sendPaused` boolean
+attributes to determine the state of the underlying `poll_handle_t` event
+watcher used by a socket.
+
+Socket creation can be expensive on some platforms, and the above methods offer an alternative to closing and deleting a socket to prevent it from keeping the
+[Node.js][nodejs] event loop alive.
+
+The [Node.js][nodejs] [net-ping][net-ping] module offers a concrete example
+of using these methods.  Since [Node.js][nodejs] offers no raw socket support
+this module is used to implement ICMP echo (ping) support.  Once all ping
+requests have been processed by the [net-ping][net-ping] module the
+`pauseRecv()` and `pauseSend()` methods are used to allow a program to exit if
+required.
+
+The following example stops the underlying `poll_handle_t` event watcher used
+by a socket from generating writeable events, however since readable events
+will still be watched for the program will not exit immediately:
+
+    if (! socket.recvPaused)
+        socket.pauseRecv ();
+
+The following can the be used to resume readable events:
+
+    if (socket.recvPaused)
+        socket.resumeRecv ();
+
+The following example stops the underlying `poll_handle_t` event watcher used
+by a socket from generating both readable and writeable events, if no other
+event watchers have been setup (e.g. `setTimeout()`) the program will exit.
+
+    if (! socket.recvPaused)
+        socket.pauseRecv ();
+    if (! socket.sendPaused)
+        socket.pauseSend ();
+
+The following can the be used to resume both readable and writeable events:
+
+    if (socket.recvPaused)
+        socket.resumeRecv ();
+    if (socket.sendPaused)
+        socket.resumeSend ();
+
+When data is sent using a sockets `send()` method the `resumeSend()` method
+will be called if the sockets `sendPaused` attribute is `true`, however the
+`resumeRecv()` method will not be called regardless of whether the sockets
+`recvPaused` attribute is `true` or `false`.
+
+[nodejs]: http://nodejs.org "Node.js"
+[net-ping]: http://npmjs.org/package/net-ping "net-ping"
+
 # Automatic IP Header Generation
 
 When sending a packet over a raw socket the operating system will
@@ -286,59 +355,6 @@ The following example disables automatic IP header generation:
 
     socket.noIpHeader (true);
 
-## socket.pauseRecv () - socket.resumeRecv ()
-
-The `pauseRecv()` method stops the underlying `libuv` `poll_handle_t` from
-generating readable events.
-
-The main purpose of this is to prevent the raw socket from keeping the event
-loop alive, allowing the program to exit if there is nothing else to do.
-
-Socket creation can be expensive on some platforms.  This method offers an
-alternative to closing and deleting a socket to prevent the socket from
-keeping a program running.
-
-The sockets `recvPaused` attribute can be used to determine whether readable
-event generation has been paused.
-
-The following example pauses all readable events if readable events have not
-been paused:
-
-    if (! socket.recvPaused)
-        socket.pauseRecv ();
-
-The `resumeRecv()` method performs the reverse of the `pauseRecv()` method:
-
-    if (socket.recvPaused)
-        socket.resumeRecv ();
-
-## socket.pauseSend () - socket.resumeSend ()
-
-The `pauseSend()` method stops the underlying `libuv` `poll_handle_t` from
-generating writeable events.
-
-The main purpose of this is to prevent the raw socket from keeping the event
-loop alive, allowing the program to exit if there is nothing else to do.
-
-The sockets `sendPaused` attribute can be used to determine whether writeable
-event generation has been paused.
-
-Care should be taken when resuming writable event generation as it can
-generate an overwhelming number of events which could affecting program
-performance.  This method is used by the raw socket itself and programs do
-not normally need to call use the `pauseSend()` and `resumeSend()` methods.
-
-The following example pauses all writeable events if read writeable have not
-been paused:
-
-    if (! socket.sendPaused)
-        socket.pauseSend ();
-
-The `resumeSend()` method performs the reverse of the `pauseSend()` method.
-
-    if (socket.sendPaused)
-        socket.resumeSend ();
-
 ## socket.send (buffer, offset, length, address, callback)
 
 The `send()` method sends data to a remote host.
@@ -359,9 +375,6 @@ be passed to the `callback` function:
 If the `noIpHeader` option was specified as `true` when creating the socket,
 or the `noIpHeader()` method exposed by the socket has been called with a
 value of `true`, the data to be sent in the `buffer` must include a IP header.
-
-If the sockets `sendPaused` attribute is `true` the `resumeSend()` method will
-be called on the socket so that the data can be sent.
 
 The following example sends a ICMP ping message to a remote host:
 
@@ -436,6 +449,11 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
    methods
 
 [net-ping]: https://npmjs.org/package/net-ping "net-ping"
+
+# Version 1.1.4 - 05/03/2013
+
+ * Cleanup documentation for the `pauseSend()`, `pauseRecv()`, `resumeSend()`
+   and `resumeRecv()` methods in the README.md
 
 # Roadmap
 
