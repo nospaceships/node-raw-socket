@@ -182,7 +182,7 @@ Handle<Value> SocketWrap::NoIpHeader (const Arguments& args) {
 	}
 
 #ifdef _WIN32
-	DWORD val = socket->no_ip_header_ ? FALSE : FALSE;
+	DWORD val = socket->no_ip_header_ ? TRUE : FALSE;
 	if (socket->family_ == AF_INET6)
 		rc = setsockopt (socket->poll_fd_, IPPROTO_IPV6, IPV6_HDRINCL,
 				(const char *) &val, sizeof (val));
