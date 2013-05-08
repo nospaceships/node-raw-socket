@@ -65,7 +65,8 @@ understand how raw sockets will behave before attempting to use this module.
 
 This module uses the `libuv` library to integrate into the [Node.js][nodejs]
 event loop - this library is also used by [Node.js][nodejs].  An underlying
- `libuv` library `poll_handle_t` event watcher is used to monitor the underlying operating system raw socket used by a socket object.
+ `libuv` library `poll_handle_t` event watcher is used to monitor the
+underlying operating system raw socket used by a socket object.
 
 All the while a socket object exists, and the sockets `close()` method has not
 been called, the raw socket will keep the [Node.js][nodejs] event loop alive
@@ -84,7 +85,8 @@ Each socket object also exports the `recvPaused` and `sendPaused` boolean
 attributes to determine the state of the underlying `poll_handle_t` event
 watcher used by a socket.
 
-Socket creation can be expensive on some platforms, and the above methods offer an alternative to closing and deleting a socket to prevent it from keeping the
+Socket creation can be expensive on some platforms, and the above methods offer
+an alternative to closing and deleting a socket to prevent it from keeping the
 [Node.js][nodejs] event loop alive.
 
 The [Node.js][nodejs] [net-ping][net-ping] module offers a concrete example
@@ -454,6 +456,12 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
 
  * Cleanup documentation for the `pauseSend()`, `pauseRecv()`, `resumeSend()`
    and `resumeRecv()` methods in the README.md
+
+# Version 1.1.5 - ?
+
+ * Reformat some lines in the README.md file inline with the rest of the file
+ * `IP_HDRINCL` and `IPV6_HDRINCL` socket options always set to `FALSE` on
+   Windows platforms
 
 # Roadmap
 
