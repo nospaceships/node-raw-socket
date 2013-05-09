@@ -432,6 +432,20 @@ The following example sets the value of `IP_TTL` socket option to `1`:
     
     socket.setOption (level, option, buffer, buffer.length);
 
+To avoid dealing with endianess the `setOption()` method supports a three
+argument form which can be used for socket options requiring a 32bit unsigned
+integer value (for example the `IP_TTL` socket option used in the previous
+example).  Its signature is as follows:
+
+    socket.setOption (level, option, value)
+
+The previous example can be re-written to use this form:
+
+    var level = raw.SocketLevel.IPPROTO_IP;
+    var option = raw.SocketOption.IP_TTL;
+
+    socket.setOption (level, option, 1);
+
 # Example Programs
 
 Example programs are included under the modules `example` directory.
