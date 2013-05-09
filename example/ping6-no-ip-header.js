@@ -1,20 +1,14 @@
 
 var raw = require ("../");
 
-if (process.argv.length < 3) {
-	console.log ("node ping6-no-ip-header <target>");
-	process.exit (-1);
-}
-
-var target = process.argv[2];
-
 var options = {
 	addressFamily: raw.AddressFamily.IPv6,
-	protocol: raw.Protocol.ICMPv6,
-	noIpHeader: true
+	protocol: raw.Protocol.ICMPv6
 };
 
 var socket = raw.createSocket (options);
+
+socket.setOption ("IPV6_HDRINCL", new Buffer ([0x00, 0x00, 0x00, 0x01]), 4);
 
 socket.on ("close", function () {
 	console.log ("socket closed");
@@ -31,7 +25,7 @@ socket.on ("message", function (buffer, source) {
 	console.log ("data: " + buffer.toString ("hex"));
 });
 
-// ICMPv6 echo (ping) request
+// ICMP echo (ping) request (the source IP address used may not match yours)
 var buffer = new Buffer ([
 		0x60, 0x00, 0x00, 0x00, 0x00, 0x28, 0x3a, 0x80,
 		0xfe, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -45,6 +39,7 @@ var buffer = new Buffer ([
 		0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69]);
 
 function ping6 () {
+	target = "fe80::713b:ee11:cb44:2898";
 	socket.send (buffer, 0, buffer.length, target, function (error, bytes) {
 		if (error) {
 			console.log (error.toString ());
@@ -52,7 +47,7 @@ function ping6 () {
 			console.log ("sent " + bytes + " bytes to " + target);
 		}
 	});
-	
+
 	setTimeout (ping6, 1000);
 }
 

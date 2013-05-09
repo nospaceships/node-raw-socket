@@ -40,10 +40,42 @@ void InitAll (Handle<Object> target) {
 	RecvReadySymbol = NODE_PSYMBOL("recvReady");
 	SendReadySymbol = NODE_PSYMBOL("sendReady");
 
+	SocketWrap::ExportConstants (target);
+
 	SocketWrap::Init (target);
 }
 
 NODE_MODULE(raw, InitAll)
+
+void SocketWrap::ExportConstants (Handle<Object> target) {
+	Local<Object> socket_level = Object::New ();
+	Local<Object> socket_option = Object::New ();
+
+	target->Set (String::NewSymbol ("SocketLevel"), socket_level);
+	target->Set (String::NewSymbol ("SocketOption"), socket_option);
+
+	socket_level->Set (String::NewSymbol ("SOL_SOCKET"), Number::New (SOL_SOCKET));
+	socket_level->Set (String::NewSymbol ("IPPROTO_IP"), Number::New (IPPROTO_IP));
+	socket_level->Set (String::NewSymbol ("IPPROTO_IPV6"), Number::New (IPPROTO_IPV6));
+
+	socket_option->Set (String::NewSymbol ("SO_BROADCAST"), Number::New (SO_BROADCAST));
+	socket_option->Set (String::NewSymbol ("SO_RCVBUF"), Number::New (SO_PROTOCOL_INFO));
+	socket_option->Set (String::NewSymbol ("SO_RCVTIMEO"), Number::New (SO_PROTOCOL_INFO));
+	socket_option->Set (String::NewSymbol ("SO_SNDBUF"), Number::New (SO_PROTOCOL_INFO));
+	socket_option->Set (String::NewSymbol ("SO_SNDTIMEO"), Number::New (SO_PROTOCOL_INFO));
+
+	socket_option->Set (String::NewSymbol ("IP_HDRINCL"), Number::New (IP_HDRINCL));
+	socket_option->Set (String::NewSymbol ("IP_OPTIONS"), Number::New (IP_OPTIONS));
+	socket_option->Set (String::NewSymbol ("IP_TOS"), Number::New (IP_TOS));
+	socket_option->Set (String::NewSymbol ("IP_TTL"), Number::New (IP_TTL));
+
+#ifdef _WIN32
+	socket_option->Set (String::NewSymbol ("IPV6_HDRINCL"), Number::New (IPV6_HDRINCL));
+#endif
+	socket_option->Set (String::NewSymbol ("IPV6_TTL"), Number::New (IPV6_UNICAST_HOPS));
+	socket_option->Set (String::NewSymbol ("IPV6_UNICAST_HOPS"), Number::New (IPV6_UNICAST_HOPS));
+	socket_option->Set (String::NewSymbol ("IPV6_V6ONLY"), Number::New (IPV6_V6ONLY));
+}
 
 void SocketWrap::Init (Handle<Object> target) {
 	HandleScope scope;
@@ -55,10 +87,11 @@ void SocketWrap::Init (Handle<Object> target) {
 	
 	NODE_SET_PROTOTYPE_METHOD(tpl, "close", Close);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "generateChecksums", GenerateChecksums);
-	NODE_SET_PROTOTYPE_METHOD(tpl, "noIpHeader", NoIpHeader);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "getOption", GetOption);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "recv", Recv);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "send", Send);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "pause", Pause);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "setOption", SetOption);
 	
 	target->Set (String::NewSymbol ("SocketWrap"), tpl->GetFunction ());
 }
@@ -162,52 +195,63 @@ Handle<Value> SocketWrap::GenerateChecksums (const Arguments& args) {
 	return scope.Close (args.This ());
 }
 
-Handle<Value> SocketWrap::NoIpHeader (const Arguments& args) {
+Handle<Value> SocketWrap::GetOption (const Arguments& args) {
 	HandleScope scope;
 	SocketWrap* socket = SocketWrap::Unwrap<SocketWrap> (args.This ());
-	int rc;
 	
-	if (args.Length () < 1) {
+	if (args.Length () < 3) {
 		ThrowException (Exception::Error (String::New (
-				"At least one argument is required")));
+				"Three arguments are required")));
 		return scope.Close (args.This ());
-	}
-	
-	if (! args[0]->IsBoolean ()) {
-		ThrowException (Exception::TypeError (String::New (
-				"noHeader argument must be a boolean")));
-		return scope.Close (args.This ());
-	} else {
-		socket->no_ip_header_ = args[0]->ToBoolean ()->Value ();
 	}
 
-#ifdef _WIN32
-	DWORD val = socket->no_ip_header_ ? TRUE : FALSE;
-	if (socket->family_ == AF_INET6)
-		rc = setsockopt (socket->poll_fd_, IPPROTO_IPV6, IPV6_HDRINCL,
-				(const char *) &val, sizeof (val));
-	else
-		rc = setsockopt (socket->poll_fd_, IPPROTO_IP, IP_HDRINCL,
-				(const char *) &val, sizeof (val));
-#else
-	int val = socket->no_ip_header_ ? 1 : 0;
-	if (socket->family_ == AF_INET6) {
-		ThrowException (Exception::Error (String::New ("The noIpHeader option "
-				"is not supported for IPv6 on this platform")));
+	if (! args[0]->IsNumber ()) {
+		ThrowException (Exception::TypeError (String::New (
+				"Level argument must be a number")));
 		return scope.Close (args.This ());
-	} else {	
-		rc = setsockopt (socket->poll_fd_, IPPROTO_IP, IP_HDRINCL,
-				(void *) &val, sizeof (val));
 	}
-#endif
+
+	if (! args[1]->IsNumber ()) {
+		ThrowException (Exception::TypeError (String::New (
+				"Option argument must be a number")));
+		return scope.Close (args.This ());
+	}
+
+	int level = args[0]->ToInt32 ()->Value ();
+	int option = args[1]->ToInt32 ()->Value ();
+	SOCKET_OPT_TYPE val = NULL;
+	unsigned int ival = 0;
+	SOCKET_LEN_TYPE len;
+
+	if (! node::Buffer::HasInstance (args[2])) {
+		ThrowException (Exception::TypeError (String::New (
+				"Value argument must be a node Buffer object if length is "
+				"provided")));
+		return scope.Close (args.This ());
+	}
+	
+	Local<Object> buffer = args[2]->ToObject ();
+	val = node::Buffer::Data (buffer);
+
+	if (! args[3]->IsInt32 ()) {
+		ThrowException (Exception::TypeError (String::New (
+				"Length argument must be an unsigned integer")));
+		return scope.Close (args.This ());
+	}
+
+	len = node::Buffer::Length (buffer);
+
+	int rc = getsockopt (socket->poll_fd_, level, option,
+			(val ? val : (SOCKET_OPT_TYPE) &ival), &len);
 
 	if (rc == SOCKET_ERROR) {
 		ThrowException (Exception::Error (String::New (
 				raw_strerror (SOCKET_ERRNO))));
 		return scope.Close (args.This ());
 	}
-
-	return scope.Close (args.This ());
+	
+	Local<Number> got = Integer::NewFromUnsigned (len);
+	return scope.Close (got);
 }
 
 void SocketWrap::HandleIOEvent (int status, int revents) {
@@ -519,6 +563,81 @@ Handle<Value> SocketWrap::Send (const Arguments& args) {
 	Local<Value> argv[argc];
 	argv[0] = Number::New (rc);
 	cb->Call (Context::GetCurrent ()->Global (), argc, argv);
+	
+	return scope.Close (args.This ());
+}
+
+Handle<Value> SocketWrap::SetOption (const Arguments& args) {
+	HandleScope scope;
+	SocketWrap* socket = SocketWrap::Unwrap<SocketWrap> (args.This ());
+	
+	if (args.Length () < 3) {
+		ThrowException (Exception::Error (String::New (
+				"Three or four arguments are required")));
+		return scope.Close (args.This ());
+	}
+
+	if (! args[0]->IsNumber ()) {
+		ThrowException (Exception::TypeError (String::New (
+				"Level argument must be a number")));
+		return scope.Close (args.This ());
+	}
+
+	if (! args[1]->IsNumber ()) {
+		ThrowException (Exception::TypeError (String::New (
+				"Option argument must be a number")));
+		return scope.Close (args.This ());
+	}
+
+	int level = args[0]->ToInt32 ()->Value ();
+	int option = args[1]->ToInt32 ()->Value ();
+	SOCKET_OPT_TYPE val = NULL;
+	unsigned int ival = 0;
+	SOCKET_LEN_TYPE len;
+
+	if (args.Length () > 3) {
+		if (! node::Buffer::HasInstance (args[2])) {
+			ThrowException (Exception::TypeError (String::New (
+					"Value argument must be a node Buffer object if length is "
+					"provided")));
+			return scope.Close (args.This ());
+		}
+		
+		Local<Object> buffer = args[2]->ToObject ();
+		val = node::Buffer::Data (buffer);
+
+		if (! args[3]->IsInt32 ()) {
+			ThrowException (Exception::TypeError (String::New (
+					"Length argument must be an unsigned integer")));
+			return scope.Close (args.This ());
+		}
+
+		len = args[3]->ToInt32 ()->Value ();
+
+		if (len > node::Buffer::Length (buffer)) {
+			ThrowException (Exception::TypeError (String::New (
+					"Length argument is larger than buffer length")));
+			return scope.Close (args.This ());
+		}
+	} else {
+		if (! args[2]->IsUint32 ()) {
+			ThrowException (Exception::TypeError (String::New (
+					"Value argument must be a unsigned integer")));
+			return scope.Close (args.This ());
+		}
+
+		ival = args[2]->ToUint32 ()->Value ();
+		len = 4;
+	}
+
+	int rc = setsockopt (socket->poll_fd_, level, option,
+			(val ? val : (SOCKET_OPT_TYPE) &ival), len);
+
+	if (rc == SOCKET_ERROR) {
+		ThrowException (Exception::Error (String::New (
+				raw_strerror (SOCKET_ERRNO))));
+		return scope.Close (args.This ());
+	}
 	
 	return scope.Close (args.This ());
 }
