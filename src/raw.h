@@ -24,6 +24,8 @@
 #include <winsock2.h>
 #include <Ws2tcpip.h>
 #define SOCKET_ERRNO WSAGetLastError()
+#define SOCKET_OPT_TYPE char *
+#define SOCKET_LEN_TYPE int
 #else
 #include <errno.h>
 #include <unistd.h>
@@ -37,6 +39,8 @@
 #define SOCKET_ERRNO errno
 #define INVALID_SOCKET -1
 #define closesocket close
+#define SOCKET_OPT_TYPE void *
+#define SOCKET_LEN_TYPE socklen_t
 #endif
 
 using namespace v8;
@@ -47,34 +51,36 @@ class SocketWrap : public node::ObjectWrap {
 public:
 	void HandleIOEvent (int status, int revents);
 	static void Init (Handle<Object> target);
+	static void ExportConstants (Handle<Object> target);
 
 private:
 	SocketWrap ();
 	~SocketWrap ();
-	
+
 	static Handle<Value> Close (const Arguments& args);
-	
+
 	void CloseSocket (void);
 	int CreateSocket (void);
-	
+
 	static Handle<Value> GenerateChecksums (const Arguments& args);
-	
+	static Handle<Value> GetOption (const Arguments& args);
+
 	static void OnClose (uv_handle_t *handle);
-	
+
 	static Handle<Value> New (const Arguments& args);
-	static Handle<Value> NoIpHeader (const Arguments& args);
 	static Handle<Value> Pause (const Arguments& args);
 	static Handle<Value> Recv (const Arguments& args);
 	static Handle<Value> Send (const Arguments& args);
-	
+	static Handle<Value> SetOption (const Arguments& args);
+
 	bool generate_checksums_;
 	unsigned int checksum_offset_;
-	
+
 	bool no_ip_header_;
-	
+
 	uint32_t family_;
 	uint32_t protocol_;
-	
+
 	SOCKET poll_fd_;
 	uv_poll_t poll_watcher_;
 	bool poll_initialised_;

@@ -35,15 +35,15 @@ for (var key in events.EventEmitter.prototype) {
 
 function Socket (options) {
 	Socket.super_.call (this);
-	
+
 	this.requests = [];
 	this.buffer = new Buffer ((options && options.bufferSize)
 			? options.bufferSize
 			: 4096);
-	
+
 	this.recvPaused = false;
 	this.sendPaused = true;
-	
+
 	this.wrap = new raw.SocketWrap (
 			((options && options.protocol)
 					? options.protocol
@@ -52,15 +52,12 @@ function Socket (options) {
 					? options.addressFamily
 					: AddressFamily.IPv4)
 		);
-	
+
 	if (options && options.generateChecksums) {
 		offset = options.checksumOffset || 0;
 		this.generateChecksums (true, offset);
 	}
-	
-	if (options && options.noIpHeader)
-		this.noIpHeader (true);
-	
+
 	var me = this;
 	this.wrap.on ("sendReady", this.onSendReady.bind (me));
 	this.wrap.on ("recvReady", this.onRecvReady.bind (me));
@@ -80,9 +77,8 @@ Socket.prototype.generateChecksums = function (generate, offset) {
 	return this;
 }
 
-Socket.prototype.noIpHeader = function (noHeader) {
-	this.wrap.noIpHeader ((noHeader ? true : false));
-	return this;
+Socket.prototype.getOption = function (level, option, value, length) {
+	return this.wrap.getOption (level, option, value, length);
 }
 
 Socket.prototype.onClose = function () {
@@ -155,12 +151,12 @@ Socket.prototype.send = function (buffer, offset, length, address, callback) {
 				+ "' plus length '" + length + "'"));
 		return this;
 	}
-	
+
 	if (! net.isIP (address)) {
 		callback.call (this, new Error ("Invalid IP address '" + address + "'"));
 		return this;
 	}
-	
+
 	var req = {
 		buffer: buffer,
 		offset: offset,
@@ -169,11 +165,18 @@ Socket.prototype.send = function (buffer, offset, length, address, callback) {
 		callback: callback
 	};
 	this.requests.push (req);
-	
+
 	if (this.sendPaused)
 		this.resumeSend ();
-	
+
 	return this;
+}
+
+Socket.prototype.setOption = function (level, option, value, length) {
+	if (arguments.length > 3)
+		this.wrap.setOption (level, option, value, length);
+	else
+		this.wrap.setOption (level, option, value);
 }
 
 exports.createSocket = function (options) {
@@ -184,3 +187,6 @@ exports.AddressFamily = AddressFamily;
 exports.Protocol = Protocol;
 
 exports.Socket = Socket;
+
+exports.SocketLevel = raw.SocketLevel;
+exports.SocketOption = raw.SocketOption;
