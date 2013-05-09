@@ -239,7 +239,7 @@ Handle<Value> SocketWrap::GetOption (const Arguments& args) {
 		return scope.Close (args.This ());
 	}
 
-	len = node::Buffer::Length (buffer);
+	len = (SOCKET_LEN_TYPE) node::Buffer::Length (buffer);
 
 	int rc = getsockopt (socket->poll_fd_, level, option,
 			(val ? val : (SOCKET_OPT_TYPE) &ival), &len);
