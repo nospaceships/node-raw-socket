@@ -47,13 +47,9 @@ the socket type `SOCK_RAW` specified.
 # Raw Socket Behaviour
 
 Raw sockets behave in different ways depending on operating system and
-version.  For example when the automatic IP header generation feature is
-disabled some operating systems will modify the IP header included in the data
-to be sent, i.e. a network card maybe performing IP checksum offload, and the
-operating system may set the `Protocol` field overriding what was provided in
-the data to be sent.
+version, and may support different socket options.
 
-Some operating system versions may also restict the use of raw sockets to
+Some operating system versions may restict the use of raw sockets to
 privileged users.  If this is the case an exception will be thrown on socket
 creation using a message similar to `Operation not permitted` (this message
 is likely to be different depending on operating system version).
@@ -196,6 +192,43 @@ The following constants are defined in this object:
  * `UDP` - protocol number 17
  * `ICMPv6` - protocol number 58
 
+## raw.SocketLevel
+
+This object contains constants which can be used for the `level` parameter to
+the `getOption()` and `setOption()` methods exposed by this module.
+
+The following constants are defined in this object:
+
+ * `SOL_SOCKET`
+ * `IPPROTO_IP`
+ * `IPPROTO_IPV6`
+
+## raw.SocketOption
+
+This object contains constants which can be used for the `option` parameter to
+the `getOption()` and `setOption()` methods exposed by this module.
+
+The following constants are defined in this object:
+
+ * `SO_RCVBUF`
+ * `SO_RCVTIMEO`
+ * `SO_SNDBUF`
+ * `SO_SNDTIMEO`
+ * `IP_HDRINCL`
+ * `IP_OPTIONS`
+ * `IP_TOS`
+ * `IP_TTL`
+ * `IPV6_TTL`
+ * `IPV6_UNICAST_HOPS`
+ * `IPV6_V6ONLY`
+
+*The `IPV6_TTL` socket option is not known to be defined by any operating
+system, it is provided in convenience to be synonymous with IPv4*
+
+For Windows platforms the following constant is also defined:
+
+ * `IPV6_HDRINCL`
+
 # Using This Module
 
 Raw sockets are represented by an instance of the `Socket` class.  This
@@ -241,11 +274,6 @@ The error will be an instance of the `Error` class.
 The `protocol` parameter, or its default value of the constant
 `raw.Protocol.None`, will be specified in the protocol field of each IP
 header.
-
-Upon receiving packets IP headers are **NOT** removed by the operating system
-when using IPv4 raw socket and IP headers in received packets will be included
-in data presented by this module.  When using IPv6 raw sockets IP headers are
-**NOT** included in data presented by this module.
 
 ## socket.on ("close", callback)
 
@@ -315,6 +343,35 @@ resulting in checksums being written to byte 3 and 4 of the send buffer
 
     socket.generateChecksums (true, 2);
 
+## socket.getOption (level, option, buffer, length)
+
+The `getOption()` method gets a socket option using the operating systems
+`getsockopt()` function.
+
+The `level` parameter is one of the constants defined in the `raw.SocketLevel`
+object.  The `option` parameter is one of the constants defined in the
+`raw.SocketOption` object.  The `buffer` parameter is a [Node.js][nodejs]
+`Buffer` object where the socket option value will be written.  The `length`
+parameter specifies the size of the `buffer` parameter.
+
+If an error occurs an exception will be thrown, the exception will be an
+instance of the `Error` class.
+
+The number of bytes written into the `buffer` parameter is returned, and can
+differ from the amount of space available.
+
+The following example retrieves the current value of `IP_TTL` socket option:
+
+    var level = raw.SocketLevel.IPPROTO_IP;
+    var option = raw.SocketOption.IP_TTL;
+    
+    # IP_TTL is a signed integer on some platforms so a 4 byte buffer is used
+    var buffer = new Buffer (4);
+    
+    var written = socket.getOption (level, option, buffer, buffer.length);
+    
+    console.log (buffer.toString ("hex"), 0, written);
+
 ## socket.send (buffer, offset, length, address, callback)
 
 The `send()` method sends data to a remote host.
@@ -349,11 +406,31 @@ The following example sends a ICMP ping message to a remote host:
             console.log ("sent " + bytes + " bytes");
     });
 
-## socket.setOption (name, buffer, length)
+## socket.setOption (level, option, buffer, length)
 
-The `setOption()` method sets a socket option.
+The `setOption()` method sets a socket option using the operating systems
+`setsockopt()` function.
 
+The `level` parameter is one of the constants defined in the `raw.SocketLevel`
+object.  The `option` parameter is one of the constants defined in the
+`raw.SocketOption` object.  The `buffer` parameter is a [Node.js][nodejs]
+`Buffer` object where the socket option value is specified.  The `length`
+parameter specifies how much space the option value occupies in the `buffer`
+parameter.
 
+If an error occurs an exception will be thrown, the exception will be an
+instance of the `Error` class.
+
+The following example sets the value of `IP_TTL` socket option to `1`:
+
+    var level = raw.SocketLevel.IPPROTO_IP;
+    var option = raw.SocketOption.IP_TTL;
+    
+    # IP_TTL is a signed integer on some platforms so a 4 byte buffer is used,
+    # x86 computers use little-endian format so specify bytes reverse order
+    var buffer = new Buffer ([0x01, 0x00, 0x00, 0x00]);
+    
+    socket.setOption (level, option, buffer, buffer.length);
 
 # Example Programs
 
@@ -420,8 +497,8 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
 # Version 1.1.5 - 09/05/2013
 
  * Reformated lines in the README.md file inline with the rest of the file
- * Removed the `noIpHeader()` method and (the `setOption()` method should be
-   utilised to configure the `IP_HDRINCL` socket option - and possibly
+ * Removed the `noIpHeader()` method (the `setOption()` method should be
+   used to configure the `IP_HDRINCL` socket option - and possibly
    `IPV6_HDRINCL` on Windows platforms), and removed the `Automatic IP Header
    Generation` section from the README.md file
  * Added the `setOption()` and `getOption()` methods, and added the
