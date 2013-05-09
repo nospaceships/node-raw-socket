@@ -59,10 +59,10 @@ void SocketWrap::ExportConstants (Handle<Object> target) {
 	socket_level->Set (String::NewSymbol ("IPPROTO_IPV6"), Number::New (IPPROTO_IPV6));
 
 	socket_option->Set (String::NewSymbol ("SO_BROADCAST"), Number::New (SO_BROADCAST));
-	socket_option->Set (String::NewSymbol ("SO_RCVBUF"), Number::New (SO_PROTOCOL_INFO));
-	socket_option->Set (String::NewSymbol ("SO_RCVTIMEO"), Number::New (SO_PROTOCOL_INFO));
-	socket_option->Set (String::NewSymbol ("SO_SNDBUF"), Number::New (SO_PROTOCOL_INFO));
-	socket_option->Set (String::NewSymbol ("SO_SNDTIMEO"), Number::New (SO_PROTOCOL_INFO));
+	socket_option->Set (String::NewSymbol ("SO_RCVBUF"), Number::New (SO_RCVBUF));
+	socket_option->Set (String::NewSymbol ("SO_RCVTIMEO"), Number::New (SO_RCVTIMEO));
+	socket_option->Set (String::NewSymbol ("SO_SNDBUF"), Number::New (SO_SNDBUF));
+	socket_option->Set (String::NewSymbol ("SO_SNDTIMEO"), Number::New (SO_SNDTIMEO));
 
 	socket_option->Set (String::NewSymbol ("IP_HDRINCL"), Number::New (IP_HDRINCL));
 	socket_option->Set (String::NewSymbol ("IP_OPTIONS"), Number::New (IP_OPTIONS));
