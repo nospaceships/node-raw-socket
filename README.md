@@ -523,6 +523,7 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
    `setOption()` method to configure the `IPV6_HDRINCL` socket option)
  * Added the example program `get-option.js`
  * Added the example program `ping-set-option-ip-ttl.js`
+ * Use MIT license instead of GPL
 
 # Roadmap
 
