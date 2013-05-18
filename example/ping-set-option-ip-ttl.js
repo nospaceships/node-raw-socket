@@ -17,8 +17,6 @@ var options = {
 
 var socket = raw.createSocket (options);
 
-socket.setOption (raw.SocketLevel.IPPROTO_IP, raw.SocketOption.IP_TTL, ttl);
-
 socket.on ("close", function () {
 	console.log ("socket closed");
 	process.exit (-1);
@@ -42,14 +40,23 @@ var buffer = new Buffer ([
 		0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77, 0x61,
 		0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69]);
 
+var socketLevel = raw.SocketLevel.IPPROTO_IP;
+var socketOption = raw.SocketOption.IP_TTL;
+
+function beforeSend () {
+	socket.setOption (socketLevel, socketOption, ttl);
+}
+
+function afterSend (error, bytes) {
+	if (error) {
+		console.log (error.toString ());
+	} else {
+		console.log ("sent " + bytes + " bytes to " + target);
+	}
+}
+
 function ping () {
-	socket.send (buffer, 0, buffer.length, target, function (error, bytes) {
-		if (error) {
-			console.log (error.toString ());
-		} else {
-			console.log ("sent " + bytes + " bytes to " + target);
-		}
-	});
+	socket.send (buffer, 0, buffer.length, target, beforeSend, afterSend);
 
 	setTimeout (ping, 1000);
 }
