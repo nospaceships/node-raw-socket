@@ -8,7 +8,8 @@ var options = {
 
 var socket = raw.createSocket (options);
 
-socket.setOption ("IPV6_HDRINCL", new Buffer ([0x00, 0x00, 0x00, 0x01]), 4);
+socket.setOption (raw.SocketLevel.IPPROTO_IP, raw.SocketOption.IP_HDRINCL,
+		new Buffer ([0x00, 0x00, 0x00, 0x01]), 4);
 
 socket.on ("close", function () {
 	console.log ("socket closed");

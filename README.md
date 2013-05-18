@@ -49,7 +49,7 @@ the socket type `SOCK_RAW` specified.
 Raw sockets behave in different ways depending on operating system and
 version, and may support different socket options.
 
-Some operating system versions may restict the use of raw sockets to
+Some operating system versions may restrict the use of raw sockets to
 privileged users.  If this is the case an exception will be thrown on socket
 creation using a message similar to `Operation not permitted` (this message
 is likely to be different depending on operating system version).
@@ -372,7 +372,7 @@ The following example retrieves the current value of `IP_TTL` socket option:
     
     console.log (buffer.toString ("hex"), 0, written);
 
-## socket.send (buffer, offset, length, address, callback)
+## socket.send (buffer, offset, length, address, beforeCallback, afterCallback)
 
 The `send()` method sends data to a remote host.
 
@@ -382,14 +382,20 @@ data to be sent.  The `length` parameter specifies how many bytes from
 `address` parameter contains the dotted quad formatted IP address of the
 remote host to send the data to, e.g `192.168.1.254`, for IPv6 raw sockets the
 `address` parameter contains the compressed formatted IP address of the remote
-host to send the data to, e.g. `fe80::a00:27ff:fe2a:3427`.  The `callback`
+host to send the data to, e.g. `fe80::a00:27ff:fe2a:3427`.  If provided the
+optional `beforeCallback` function is called right before the data is actually
+sent using the underlying raw socket, giving users the opportunity to perform
+pre-send actions such as setting a socket option, e.g. the IP header TTL.  No
+arguments are passed to the `beforeCallback` function.  The `afterCallback`
 function is called once the data has been sent.  The following arguments will
-be passed to the `callback` function:
+be passed to the `afterCallback` function:
 
  * `error` - Instance of the `Error` class, or `null` if no error occurred
  * `bytes` - Number of bytes sent
 
-The following example sends a ICMP ping message to a remote host:
+The following example sends a ICMP ping message to a remote host, before the
+request is actually sent the IP header TTL is modified, and modified again
+after the data has been sent:
 
     // ICMP echo (ping) request, checksum should be ok
     var buffer = new Buffer ([
@@ -399,12 +405,23 @@ The following example sends a ICMP ping message to a remote host:
             0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77, 0x61,
             0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69]);
 
-    socket.send (buffer, 0, buffer.length, target, function (error, bytes) {
+    var socketLevel = raw.SocketLevel.IPPROTO_IP
+    var socketOption = raw.SocketOption.IP_TTL;
+
+    function beforeSend () {
+        socket.setOption (socketLevel, socketOption, 1);
+    }
+    
+    function afterSend (error, bytes) {
         if (error)
             console.log (error.toString ());
         else
             console.log ("sent " + bytes + " bytes");
-    });
+        
+        socket.setOption (socketLevel, socketOption, 1);
+    }
+
+    socket.send (buffer, 0, buffer.length, target, beforeSend, afterSend);
 
 ## socket.setOption (level, option, buffer, length)
 
@@ -503,12 +520,12 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
 
 [net-ping]: https://npmjs.org/package/net-ping "net-ping"
 
-# Version 1.1.4 - 05/03/2013
+## Version 1.1.4 - 05/03/2013
 
  * Cleanup documentation for the `pauseSend()`, `pauseRecv()`, `resumeSend()`
    and `resumeRecv()` methods in the README.md
 
-# Version 1.1.5 - 09/05/2013
+## Version 1.1.5 - 09/05/2013
 
  * Reformated lines in the README.md file inline with the rest of the file
  * Removed the `noIpHeader()` method (the `setOption()` method should be
@@ -524,6 +541,16 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
  * Added the example program `get-option.js`
  * Added the example program `ping-set-option-ip-ttl.js`
  * Use MIT license instead of GPL
+
+## Version 1.1.6 - 18/05/2013
+
+ * Added the `beforeCallback` parameter to the `send()` method, and renamed the
+   `callback` parameter to `afterCallback`
+ * Fixed a few typos in the README.md file
+ * Modified the example program `ping-set-option-ip-ttl.js` to use the
+   `beforeCallback` parameter to the `send()` method
+ * The example program `ping6-no-ip-header.js` was not passing the correct
+   arguments to the `setOption()` method
 
 # Roadmap
 

@@ -107,12 +107,14 @@ Socket.prototype.onSendReady = function () {
 		var me = this;
 		var req = this.requests.shift ();
 		try {
+			if (req.beforeCallback)
+				req.beforeCallback ();
 			this.wrap.send (req.buffer, req.offset, req.length,
 					req.address, function (bytes) {
-				req.callback.call (me, null, bytes);
+				req.afterCallback.call (me, null, bytes);
 			});
 		} catch (error) {
-			req.callback.call (me, error, 0);
+			req.afterCallback.call (me, error, 0);
 		}
 	} else {
 		if (! this.sendPaused)
@@ -144,16 +146,22 @@ Socket.prototype.resumeSend = function () {
 	return this;
 }
 
-Socket.prototype.send = function (buffer, offset, length, address, callback) {
+Socket.prototype.send = function (buffer, offset, length, address,
+		beforeCallback, afterCallback) {
 	if (length + offset > buffer.length)  {
-		callback.call (this, new Error ("Buffer length '" + buffer.length
+		afterCallback.call (this, new Error ("Buffer length '" + buffer.length
 				+ "' is not large enough for the specified offset '" + offset
 				+ "' plus length '" + length + "'"));
 		return this;
 	}
+	
+	if (! afterCallback) {
+		afterCallback = beforeCallback;
+		beforeCallback = null;
+	}
 
 	if (! net.isIP (address)) {
-		callback.call (this, new Error ("Invalid IP address '" + address + "'"));
+		afterCallback.call (this, new Error ("Invalid IP address '" + address + "'"));
 		return this;
 	}
 
@@ -162,7 +170,8 @@ Socket.prototype.send = function (buffer, offset, length, address, callback) {
 		offset: offset,
 		length: length,
 		address: address,
-		callback: callback
+		afterCallback: afterCallback,
+		beforeCallback: beforeCallback
 	};
 	this.requests.push (req);
 
