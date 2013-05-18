@@ -148,16 +148,16 @@ Socket.prototype.resumeSend = function () {
 
 Socket.prototype.send = function (buffer, offset, length, address,
 		beforeCallback, afterCallback) {
+	if (! afterCallback) {
+		afterCallback = beforeCallback;
+		beforeCallback = null;
+	}
+
 	if (length + offset > buffer.length)  {
 		afterCallback.call (this, new Error ("Buffer length '" + buffer.length
 				+ "' is not large enough for the specified offset '" + offset
 				+ "' plus length '" + length + "'"));
 		return this;
-	}
-	
-	if (! afterCallback) {
-		afterCallback = beforeCallback;
-		beforeCallback = null;
 	}
 
 	if (! net.isIP (address)) {
