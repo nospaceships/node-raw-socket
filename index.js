@@ -199,3 +199,8 @@ exports.Socket = Socket;
 
 exports.SocketLevel = raw.SocketLevel;
 exports.SocketOption = raw.SocketOption;
+
+exports.htonl = raw.htonl;
+exports.htons = raw.htons;
+exports.ntohl = raw.ntohl;
+exports.ntohs = raw.ntohs;

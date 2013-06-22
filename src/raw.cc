@@ -40,14 +40,109 @@ void InitAll (Handle<Object> target) {
 	RecvReadySymbol = NODE_PSYMBOL("recvReady");
 	SendReadySymbol = NODE_PSYMBOL("sendReady");
 
-	SocketWrap::ExportConstants (target);
+	ExportConstants (target);
+	ExportFunctions (target);
 
 	SocketWrap::Init (target);
 }
 
 NODE_MODULE(raw, InitAll)
 
-void SocketWrap::ExportConstants (Handle<Object> target) {
+Handle<Value> Htonl (const Arguments& args) {
+	HandleScope scope;
+
+	if (args.Length () < 1) {
+		ThrowException (Exception::Error (String::New (
+				"One arguments is required")));
+		return scope.Close (args.This ());
+	}
+
+	if (! args[0]->IsUint32 ()) {
+		ThrowException (Exception::TypeError (String::New (
+				"Number must be a 32 unsigned integer")));
+		return scope.Close (args.This ());
+	}
+
+	unsigned int number = args[0]->ToUint32 ()->Value ();
+	Local<Integer> converted = Integer::NewFromUnsigned (htonl (number));
+
+	return scope.Close (converted);
+}
+
+Handle<Value> Htons (const Arguments& args) {
+	HandleScope scope;
+	
+	if (args.Length () < 1) {
+		ThrowException (Exception::Error (String::New (
+				"One arguments is required")));
+		return scope.Close (args.This ());
+	}
+
+	if (! args[0]->IsUint32 ()) {
+		ThrowException (Exception::TypeError (String::New (
+				"Number must be a 16 unsigned integer")));
+		return scope.Close (args.This ());
+	}
+	
+	unsigned int number = args[0]->ToUint32 ()->Value ();
+	if (number > 65535) {
+		ThrowException (Exception::RangeError (String::New (
+				"Number cannot be larger than 65535")));
+		return scope.Close (args.This ());
+	}
+	Local<Integer> converted = Integer::NewFromUnsigned (htons (number));
+
+	return scope.Close (converted);
+}
+
+Handle<Value> Ntohl (const Arguments& args) {
+	HandleScope scope;
+	
+	if (args.Length () < 1) {
+		ThrowException (Exception::Error (String::New (
+				"One arguments is required")));
+		return scope.Close (args.This ());
+	}
+
+	if (! args[0]->IsUint32 ()) {
+		ThrowException (Exception::TypeError (String::New (
+				"Number must be a 32 unsigned integer")));
+		return scope.Close (args.This ());
+	}
+
+	unsigned int number = args[0]->ToUint32 ()->Value ();
+	Local<Integer> converted = Integer::NewFromUnsigned (ntohl (number));
+
+	return scope.Close (converted);
+}
+
+Handle<Value> Ntohs (const Arguments& args) {
+	HandleScope scope;
+	
+	if (args.Length () < 1) {
+		ThrowException (Exception::Error (String::New (
+				"One arguments is required")));
+		return scope.Close (args.This ());
+	}
+
+	if (! args[0]->IsUint32 ()) {
+		ThrowException (Exception::TypeError (String::New (
+				"Number must be a 16 unsigned integer")));
+		return scope.Close (args.This ());
+	}
+	
+	unsigned int number = args[0]->ToUint32 ()->Value ();
+	if (number > 65535) {
+		ThrowException (Exception::RangeError (String::New (
+				"Number cannot be larger than 65535")));
+		return scope.Close (args.This ());
+	}
+	Local<Integer> converted = Integer::NewFromUnsigned (htons (number));
+
+	return scope.Close (converted);
+}
+
+void ExportConstants (Handle<Object> target) {
 	Local<Object> socket_level = Object::New ();
 	Local<Object> socket_option = Object::New ();
 
@@ -77,6 +172,13 @@ void SocketWrap::ExportConstants (Handle<Object> target) {
 	socket_option->Set (String::NewSymbol ("IPV6_V6ONLY"), Number::New (IPV6_V6ONLY));
 }
 
+void ExportFunctions (Handle<Object> target) {
+	target->Set (String::NewSymbol ("htonl"), FunctionTemplate::New (Htonl)->GetFunction ());
+	target->Set (String::NewSymbol ("htons"), FunctionTemplate::New (Htons)->GetFunction ());
+	target->Set (String::NewSymbol ("ntohl"), FunctionTemplate::New (Ntohl)->GetFunction ());
+	target->Set (String::NewSymbol ("ntohs"), FunctionTemplate::New (Ntohs)->GetFunction ());
+}
+
 void SocketWrap::Init (Handle<Object> target) {
 	HandleScope scope;
 	
@@ -88,11 +190,11 @@ void SocketWrap::Init (Handle<Object> target) {
 	NODE_SET_PROTOTYPE_METHOD(tpl, "close", Close);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "generateChecksums", GenerateChecksums);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "getOption", GetOption);
+	NODE_SET_PROTOTYPE_METHOD(tpl, "pause", Pause);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "recv", Recv);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "send", Send);
-	NODE_SET_PROTOTYPE_METHOD(tpl, "pause", Pause);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "setOption", SetOption);
-	
+
 	target->Set (String::NewSymbol ("SocketWrap"), tpl->GetFunction ());
 }
 
@@ -281,10 +383,6 @@ void SocketWrap::HandleIOEvent (int status, int revents) {
 	}
 }
 
-void SocketWrap::OnClose (uv_handle_t *handle) {
-	// We can re-use the socket so we won't actually do anything here
-}
-
 Handle<Value> SocketWrap::New (const Arguments& args) {
 	HandleScope scope;
 	SocketWrap* socket = new SocketWrap ();
@@ -332,6 +430,10 @@ Handle<Value> SocketWrap::New (const Arguments& args) {
 	socket->Wrap (args.This ());
 
 	return scope.Close (args.This ());
+}
+
+void SocketWrap::OnClose (uv_handle_t *handle) {
+	// We can re-use the socket so we won't actually do anything here
 }
 
 Handle<Value> SocketWrap::Pause (const Arguments& args) {
