@@ -235,6 +235,33 @@ Raw sockets are represented by an instance of the `Socket` class.  This
 module exports the `createSocket()` function which is used to create
 instances of the `Socket` class.
 
+The module also exports a number of stubs which call through to a number of
+functions provided by the operating system, i.e. `htonl()`.
+
+## raw.htonl (uint32)
+
+The `htonl()` function converts a 32 bit unsigned integer from host byte
+order to network byte order and returns the result.  This function is simply
+a stub through to the operating systems `htonl()` function.
+
+## raw.htons (uint16)
+
+The `htons()` function converts a 16 bit unsigned integer from host byte
+order to network byte order and returns the result.  This function is simply
+a stub through to the operating systems `htons()` function.
+
+## raw.ntohl (uint32)
+
+The `ntohl()` function converts a 32 bit unsigned integer from network byte
+order to host byte order and returns the result.  This function is simply
+a stub through to the operating systems `ntohl()` function.
+
+## raw.ntohs (uint16)
+
+The `ntohs()` function converts a 16 bit unsigned integer from network byte
+order to host byte order and returns the result.  This function is simply
+a stub through to the operating systems `ntohs()` function.
+
 ## raw.createSocket ([options])
 
 The `createSocket()` function instantiates and returns an instance of the
@@ -551,6 +578,11 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
    `beforeCallback` parameter to the `send()` method
  * The example program `ping6-no-ip-header.js` was not passing the correct
    arguments to the `setOption()` method
+
+## Version 1.1.7 - ?
+
+ * Added the `htonl()`, `htons()`, `ntohl()`, and `ntohs()` functions, and
+   associated example programs
 
 # Roadmap
 

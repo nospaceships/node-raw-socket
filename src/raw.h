@@ -47,11 +47,18 @@ using namespace v8;
 
 namespace raw {
 
+void ExportConstants (Handle<Object> target);
+void ExportFunctions (Handle<Object> target);
+
+Handle<Value> Htonl (const Arguments& args);
+Handle<Value> Htons (const Arguments& args);
+Handle<Value> Ntohl (const Arguments& args);
+Handle<Value> Ntohs (const Arguments& args);
+
 class SocketWrap : public node::ObjectWrap {
 public:
 	void HandleIOEvent (int status, int revents);
 	static void Init (Handle<Object> target);
-	static void ExportConstants (Handle<Object> target);
 
 private:
 	SocketWrap ();
@@ -65,9 +72,10 @@ private:
 	static Handle<Value> GenerateChecksums (const Arguments& args);
 	static Handle<Value> GetOption (const Arguments& args);
 
+	static Handle<Value> New (const Arguments& args);
+
 	static void OnClose (uv_handle_t *handle);
 
-	static Handle<Value> New (const Arguments& args);
 	static Handle<Value> Pause (const Arguments& args);
 	static Handle<Value> Recv (const Arguments& args);
 	static Handle<Value> Send (const Arguments& args);
