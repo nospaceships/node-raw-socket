@@ -188,6 +188,20 @@ Socket.prototype.setOption = function (level, option, value, length) {
 		this.wrap.setOption (level, option, value);
 }
 
+exports.createChecksum = function () {
+	var sum = 0;
+	for (var i = 0; i < arguments.length; i++) {
+		var object = arguments[i];
+		if (object instanceof Buffer) {
+			sum = raw.createChecksum (sum, object, 0, object.length);
+		} else {
+			sum = raw.createChecksum (sum, object.buffer, object.offset,
+					object.length);
+		}
+	}
+	return sum;
+}
+
 exports.createSocket = function (options) {
 	return new Socket (options || {});
 };

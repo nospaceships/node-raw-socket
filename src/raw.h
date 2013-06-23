@@ -47,6 +47,8 @@ using namespace v8;
 
 namespace raw {
 
+Handle<Value> CreateChecksum (const Arguments& args);
+
 void ExportConstants (Handle<Object> target);
 void ExportFunctions (Handle<Object> target);
 
@@ -67,6 +69,7 @@ private:
 	static Handle<Value> Close (const Arguments& args);
 
 	void CloseSocket (void);
+	
 	int CreateSocket (void);
 
 	static Handle<Value> GenerateChecksums (const Arguments& args);
