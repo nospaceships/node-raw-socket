@@ -25,6 +25,25 @@ const char* raw_strerror (int code) {
 #endif
 }
 
+static uint16_t checksum (uint16_t start_with, unsigned char *buffer,
+		size_t length) {
+	unsigned i;
+	uint32_t sum = start_with > 0 ? ~start_with & 0xffff : 0;
+
+	for (i = 0; i < (length & ~1U); i += 2) {
+		sum += (uint16_t) ntohs (*((uint16_t *) (buffer + i)));
+		if (sum > 0xffff)
+			sum -= 0xffff;
+	}
+	if (i < length) {
+		sum += buffer [i] << 8;
+		if (sum > 0xffff)
+			sum -= 0xffff;
+	}
+	
+	return ~sum & 0xffff;
+}
+
 namespace raw {
 
 static Persistent<String> CloseSymbol;
@@ -47,6 +66,77 @@ void InitAll (Handle<Object> target) {
 }
 
 NODE_MODULE(raw, InitAll)
+
+Handle<Value> CreateChecksum (const Arguments& args) {
+	HandleScope scope;
+	
+	if (args.Length () < 2) {
+		ThrowException (Exception::Error (String::New (
+				"At least one argument is required")));
+		return scope.Close (args.This ());
+	}
+
+	if (! args[0]->IsUint32 ()) {
+		ThrowException (Exception::TypeError (String::New (
+				"Start with argument must be an unsigned integer")));
+		return scope.Close (args.This ());
+	}
+	
+	uint16_t start_with = args[0]->ToUint32 ()->Value ();
+
+	if (start_with > 65535) {
+		ThrowException (Exception::TypeError (String::New (
+				"Start with argument cannot be larger than 65535")));
+		return scope.Close (args.This ());
+	}
+
+	if (! node::Buffer::HasInstance (args[1])) {
+		ThrowException (Exception::TypeError (String::New (
+				"Buffer argument must be a node Buffer object")));
+		return scope.Close (args.This ());
+	}
+	
+	Local<Object> buffer = args[1]->ToObject ();
+	char *data = node::Buffer::Data (buffer);
+	size_t length = node::Buffer::Length (buffer);
+	unsigned int offset = 0;
+	
+	if (args.Length () > 2) {
+		if (! args[2]->IsUint32 ()) {
+			ThrowException (Exception::TypeError (String::New (
+					"Offset argument must be an unsigned integer")));
+			return scope.Close (args.This ());
+		}
+		offset = args[2]->ToUint32 ()->Value ();
+		if (offset >= length) {
+			ThrowException (Exception::RangeError (String::New (
+					"Offset argument must be smaller than length of the buffer")));
+			return scope.Close (args.This ());
+		}
+	}
+	
+	if (args.Length () > 3) {
+		if (! args[3]->IsUint32 ()) {
+			ThrowException (Exception::TypeError (String::New (
+					"Length argument must be an unsigned integer")));
+			return scope.Close (args.This ());
+		}
+		unsigned int new_length = args[3]->ToUint32 ()->Value ();
+		if (new_length > length) {
+			ThrowException (Exception::RangeError (String::New (
+					"Length argument must be smaller than length of the buffer")));
+			return scope.Close (args.This ());
+		}
+		length = new_length;
+	}
+	
+	uint16_t sum = checksum (start_with, (unsigned char *) data + offset,
+			length);
+
+	Local<Integer> number = Integer::NewFromUnsigned (sum);
+	
+	return scope.Close (number);
+}
 
 Handle<Value> Htonl (const Arguments& args) {
 	HandleScope scope;
@@ -173,6 +263,8 @@ void ExportConstants (Handle<Object> target) {
 }
 
 void ExportFunctions (Handle<Object> target) {
+	target->Set (String::NewSymbol ("createChecksum"), FunctionTemplate::New (CreateChecksum)->GetFunction ());
+	
 	target->Set (String::NewSymbol ("htonl"), FunctionTemplate::New (Htonl)->GetFunction ());
 	target->Set (String::NewSymbol ("htons"), FunctionTemplate::New (Htons)->GetFunction ());
 	target->Set (String::NewSymbol ("ntohl"), FunctionTemplate::New (Ntohl)->GetFunction ());
@@ -547,24 +639,6 @@ Handle<Value> SocketWrap::Recv (const Arguments& args) {
 	return scope.Close (args.This ());
 }
 
-static uint32_t checksum (unsigned char *buffer, unsigned length) {
-	unsigned i;
-	uint32_t sum = 0;
-
-	for (i = 0; i < (length & ~1U); i += 2) {
-		sum += (uint16_t) ntohs (*((uint16_t *) (buffer + i)));
-		if (sum > 0xffff)
-			sum -= 0xffff;
-	}	
-	if (i < length) {
-		sum += buffer [i] << 8;
-		if (sum > 0xffff)
-			sum -= 0xffff;
-	}
-	
-	return ~sum & 0xffff;
-}
-
 Handle<Value> SocketWrap::Send (const Arguments& args) {
 	HandleScope scope;
 	SocketWrap* socket = SocketWrap::Unwrap<SocketWrap> (args.This ());
@@ -632,7 +706,7 @@ Handle<Value> SocketWrap::Send (const Arguments& args) {
 		} else {
 			*(data + socket->checksum_offset_) = 0;
 			*(data + socket->checksum_offset_ + 1) = 0;
-			sum = checksum ((unsigned char *) data + offset, length);
+			sum = checksum (0, (unsigned char *) data + offset, length);
 			*(data + socket->checksum_offset_) = (sum >> 8) & 0xff;
 			*(data + socket->checksum_offset_ + 1) = sum & 0xff;
 		}

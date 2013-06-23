@@ -18,8 +18,14 @@
     "url": "https://bitbucket.org/stephenwvickers/node-raw-socket"
   },
   "keywords": [
-  	 "net",
-  	 "network",
+    "checksum",
+    "checksums",
+    "htonl",
+    "htons",
+    "net",
+    "network",
+    "ntohl",
+    "ntohs",
     "raw",
     "raw-socket",
     "raw-sockets",
