@@ -72,7 +72,6 @@ private:
 	
 	int CreateSocket (void);
 
-	static Handle<Value> GenerateChecksums (const Arguments& args);
 	static Handle<Value> GetOption (const Arguments& args);
 
 	static Handle<Value> New (const Arguments& args);
@@ -83,9 +82,6 @@ private:
 	static Handle<Value> Recv (const Arguments& args);
 	static Handle<Value> Send (const Arguments& args);
 	static Handle<Value> SetOption (const Arguments& args);
-
-	bool generate_checksums_;
-	unsigned int checksum_offset_;
 
 	bool no_ip_header_;
 

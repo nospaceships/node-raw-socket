@@ -280,7 +280,6 @@ void SocketWrap::Init (Handle<Object> target) {
 	tpl->SetClassName (String::NewSymbol ("SocketWrap"));
 	
 	NODE_SET_PROTOTYPE_METHOD(tpl, "close", Close);
-	NODE_SET_PROTOTYPE_METHOD(tpl, "generateChecksums", GenerateChecksums);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "getOption", GetOption);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "pause", Pause);
 	NODE_SET_PROTOTYPE_METHOD(tpl, "recv", Recv);
@@ -354,39 +353,6 @@ int SocketWrap::CreateSocket (void) {
 	this->poll_initialised_ = true;
 	
 	return 0;
-}
-
-Handle<Value> SocketWrap::GenerateChecksums (const Arguments& args) {
-	HandleScope scope;
-	SocketWrap* socket = SocketWrap::Unwrap<SocketWrap> (args.This ());
-	
-	if (args.Length () < 1) {
-		ThrowException (Exception::Error (String::New (
-				"At least one argument is required")));
-		return scope.Close (args.This ());
-	}
-	
-	if (! args[0]->IsBoolean ()) {
-		ThrowException (Exception::TypeError (String::New (
-				"Generate argument must be a boolean")));
-		return scope.Close (args.This ());
-	} else {
-		socket->generate_checksums_ = args[0]->ToBoolean ()->Value ();
-	}
-	
-	if (args.Length () > 1) {
-		if (! args[1]->IsUint32 ()) {
-			ThrowException (Exception::TypeError (String::New (
-					"Offset argument must be an unsigned integer")));
-			return scope.Close (args.This ());
-		} else {
-			socket->checksum_offset_ = args[1]->ToUint32 ()->Value ();
-		}
-	} else {
-		socket->checksum_offset_ = 0;
-	}
-
-	return scope.Close (args.This ());
 }
 
 Handle<Value> SocketWrap::GetOption (const Arguments& args) {
@@ -508,8 +474,6 @@ Handle<Value> SocketWrap::New (const Arguments& args) {
 	socket->family_ = family;
 	
 	socket->poll_initialised_ = false;
-	
-	socket->generate_checksums_ = false;
 	
 	socket->no_ip_header_ = false;
 
@@ -646,7 +610,6 @@ Handle<Value> SocketWrap::Send (const Arguments& args) {
 	uint32_t offset;
 	uint32_t length;
 	int rc;
-	unsigned int sum;
 	char *data;
 	
 	if (args.Length () < 5) {
@@ -698,20 +661,6 @@ Handle<Value> SocketWrap::Send (const Arguments& args) {
 
 	data = node::Buffer::Data (buffer) + offset;
 	
-	if (socket->generate_checksums_) {
-		if (socket->checksum_offset_ + 2 > length) {
-			ThrowException (Exception::Error (String::New ("Checksum offset "
-					"is out of bounds")));
-			return scope.Close (args.This ());
-		} else {
-			*(data + socket->checksum_offset_) = 0;
-			*(data + socket->checksum_offset_ + 1) = 0;
-			sum = checksum (0, (unsigned char *) data + offset, length);
-			*(data + socket->checksum_offset_) = (sum >> 8) & 0xff;
-			*(data + socket->checksum_offset_ + 1) = sum & 0xff;
-		}
-	}
-	
 	if (socket->family_ == AF_INET6) {
 		struct sockaddr_in6 addr = uv_ip6_addr (*address, 0);
 		rc = sendto (socket->poll_fd_, data, length, 0,
@@ -720,12 +669,6 @@ Handle<Value> SocketWrap::Send (const Arguments& args) {
 		struct sockaddr_in addr = uv_ip4_addr (*address, 0);
 		rc = sendto (socket->poll_fd_, data, length, 0,
 				(struct sockaddr *) &addr, sizeof (addr));
-	}
-	
-	// Zero out the checksum again, in case it needs to be re-used...
-	if (socket->generate_checksums_) {
-		*(data + socket->checksum_offset_) = 0;
-		*(data + socket->checksum_offset_ + 1) = 0;
 	}
 	
 	if (rc == SOCKET_ERROR) {

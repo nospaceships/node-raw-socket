@@ -12,8 +12,6 @@ var sleep = parseInt (process.argv[4]);
 
 var options = {
 	protocol: raw.Protocol.ICMPv6,
-	generateChecksums: true,
-	checksumOffset: 2,
 	addressFamily: raw.AddressFamily.IPv6
 };
 
@@ -41,6 +39,8 @@ var buffer = new Buffer ([
 		0x69, 0x6a, 0x6b, 0x6c, 0x6d, 0x6e, 0x6f, 0x70,
 		0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77, 0x61,
 		0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69]);
+
+raw.writeChecksum (buffer, 2, raw.createChecksum (buffer));
 
 function ping6 () {
 	for (var i = 0; i < count; i++) {

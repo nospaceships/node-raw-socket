@@ -53,11 +53,6 @@ function Socket (options) {
 					: AddressFamily.IPv4)
 		);
 
-	if (options && options.generateChecksums) {
-		offset = options.checksumOffset || 0;
-		this.generateChecksums (true, offset);
-	}
-
 	var me = this;
 	this.wrap.on ("sendReady", this.onSendReady.bind (me));
 	this.wrap.on ("recvReady", this.onRecvReady.bind (me));
@@ -69,11 +64,6 @@ util.inherits (Socket, events.EventEmitter);
 
 Socket.prototype.close = function () {
 	this.wrap.close ();
-	return this;
-}
-
-Socket.prototype.generateChecksums = function (generate, offset) {
-	this.wrap.generateChecksums ((generate ? true : false), (offset || 0));
 	return this;
 }
 
@@ -200,6 +190,12 @@ exports.createChecksum = function () {
 		}
 	}
 	return sum;
+}
+
+exports.writeChecksum = function (buffer, offset, checksum) {
+	buffer.writeUInt8 ((checksum & 0xff00) >> 8, offset);
+	buffer.writeUInt8 (checksum & 0xff, offset + 1);
+	return buffer;
 }
 
 exports.createSocket = function (options) {
