@@ -606,7 +606,7 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
 
 ## Version 1.1.8 - 01/07/2013
 
- * Added the `createChecksum()` function
+ * Added the `writeChecksum()` function
  * Removed the "Automated Checksum Generation" feature - this has been
    replaced with the `createChecksum()` and `writeChecksum()` functions
 
