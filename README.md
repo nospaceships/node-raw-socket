@@ -610,6 +610,11 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
  * Removed the "Automated Checksum Generation" feature - this has been
    replaced with the `createChecksum()` and `writeChecksum()` functions
 
+## Version 1.2.0 - 02/07/2013
+
+ * Up version number to 1.2.0 (we should have done this for 1.1.8 because it
+   introduced some API breaking changes)
+
 # Roadmap
 
 In no particular order:
