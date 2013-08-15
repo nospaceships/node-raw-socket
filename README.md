@@ -615,6 +615,12 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
  * Up version number to 1.2.0 (we should have done this for 1.1.8 because it
    introduced some API breaking changes)
 
+## Version 1.2.1 - 15/08/2013
+
+ * Receiving `Assertion '!(handle->flags & (UV_CLOSING | UV_CLOSED))' failed`
+   error after a number of pings - the underlying `uv_poll_t` handle was being
+   closed twice
+
 # Roadmap
 
 In no particular order:
