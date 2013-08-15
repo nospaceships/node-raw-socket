@@ -1,6 +1,6 @@
 {
   "name": "raw-socket",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Raw sockets for Node.js.",
   "main": "index.js",
   "directories": {

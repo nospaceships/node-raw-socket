@@ -308,11 +308,9 @@ void SocketWrap::CloseSocket (void) {
 	HandleScope scope;
 	
 	if (this->poll_initialised_) {
-		uv_poll_stop (&this->poll_watcher_);
+		uv_close ((uv_handle_t *) &this->poll_watcher_, OnClose);
 		closesocket (this->poll_fd_);
 		this->poll_fd_ = INVALID_SOCKET;
-
-		uv_close ((uv_handle_t *) &this->poll_watcher_, OnClose);
 		this->poll_initialised_ = false;
 	}
 
