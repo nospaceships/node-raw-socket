@@ -289,9 +289,12 @@ void SocketWrap::Init (Handle<Object> target) {
 	target->Set (String::NewSymbol ("SocketWrap"), tpl->GetFunction ());
 }
 
-SocketWrap::SocketWrap () {}
+SocketWrap::SocketWrap () {
+	deconstructing_ = false;
+}
 
 SocketWrap::~SocketWrap () {
+	deconstructing_ = true;
 	this->CloseSocket ();
 }
 
@@ -308,7 +311,7 @@ void SocketWrap::CloseSocket (void) {
 	HandleScope scope;
 	
 	if (this->poll_initialised_) {
-		uv_close ((uv_handle_t *) &this->poll_watcher_, OnClose);
+		uv_close ((uv_handle_t *) this->poll_watcher_, OnClose);
 		closesocket (this->poll_fd_);
 		this->poll_fd_ = INVALID_SOCKET;
 		this->poll_initialised_ = false;
@@ -343,10 +346,11 @@ int SocketWrap::CreateSocket (void) {
 		return SOCKET_ERRNO;
 #endif
 
-	uv_poll_init_socket (uv_default_loop (), &this->poll_watcher_,
+	poll_watcher_ = new uv_poll_t;
+	uv_poll_init_socket (uv_default_loop (), this->poll_watcher_,
 			this->poll_fd_);
-	this->poll_watcher_.data = this;
-	uv_poll_start (&this->poll_watcher_, UV_READABLE, IoEvent);
+	this->poll_watcher_->data = this;
+	uv_poll_start (this->poll_watcher_, UV_READABLE, IoEvent);
 	
 	this->poll_initialised_ = true;
 	
@@ -487,7 +491,7 @@ Handle<Value> SocketWrap::New (const Arguments& args) {
 }
 
 void SocketWrap::OnClose (uv_handle_t *handle) {
-	// We can re-use the socket so we won't actually do anything here
+	delete handle;
 }
 
 Handle<Value> SocketWrap::Pause (const Arguments& args) {
@@ -517,8 +521,11 @@ Handle<Value> SocketWrap::Pause (const Arguments& args) {
 	int events = (pause_recv ? 0 : UV_READABLE)
 			| (pause_send ? 0 : UV_WRITABLE);
 
-	uv_poll_stop (&socket->poll_watcher_);
-	uv_poll_start (&socket->poll_watcher_, events, IoEvent);
+	if (! socket->deconstructing_) {
+		uv_poll_stop (socket->poll_watcher_);
+		if (events)
+			uv_poll_start (socket->poll_watcher_, events, IoEvent);
+	}
 	
 	return scope.Close (args.This ());
 }

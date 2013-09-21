@@ -89,8 +89,10 @@ private:
 	uint32_t protocol_;
 
 	SOCKET poll_fd_;
-	uv_poll_t poll_watcher_;
+	uv_poll_t *poll_watcher_;
 	bool poll_initialised_;
+	
+	bool deconstructing_;
 };
 
 static void IoEvent (uv_poll_t* watcher, int status, int revents);
