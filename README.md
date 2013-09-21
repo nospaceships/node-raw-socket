@@ -621,6 +621,11 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
    error after a number of pings - the underlying `uv_poll_t` handle was being
    closed twice
 
+## Version 1.2.2 - 21/09/2013
+
+ * Using uint16_t instead of uint32_t on line 87 in src/raw.cc for a value
+   that is out of range
+
 # Roadmap
 
 In no particular order:
