@@ -82,7 +82,7 @@ Handle<Value> CreateChecksum (const Arguments& args) {
 		return scope.Close (args.This ());
 	}
 	
-	uint16_t start_with = args[0]->ToUint32 ()->Value ();
+	uint32_t start_with = args[0]->ToUint32 ()->Value ();
 
 	if (start_with > 65535) {
 		ThrowException (Exception::TypeError (String::New (
@@ -130,8 +130,8 @@ Handle<Value> CreateChecksum (const Arguments& args) {
 		length = new_length;
 	}
 	
-	uint16_t sum = checksum (start_with, (unsigned char *) data + offset,
-			length);
+	uint16_t sum = checksum ((uint16_t) start_with,
+			(unsigned char *) data + offset, length);
 
 	Local<Integer> number = Integer::NewFromUnsigned (sum);
 	
