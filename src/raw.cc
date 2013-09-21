@@ -507,12 +507,12 @@ Handle<Value> SocketWrap::Pause (const Arguments& args) {
 	}
 	bool pause_recv = args[0]->ToBoolean ()->Value ();
 
-	if (! args[0]->IsBoolean ()) {
+	if (! args[1]->IsBoolean ()) {
 		ThrowException (Exception::TypeError (String::New (
 				"Send argument must be a boolean")));
 		return scope.Close (args.This ());
 	}
-	bool pause_send = args[0]->ToBoolean ()->Value ();
+	bool pause_send = args[1]->ToBoolean ()->Value ();
 	
 	int events = (pause_recv ? 0 : UV_READABLE)
 			| (pause_send ? 0 : UV_WRITABLE);

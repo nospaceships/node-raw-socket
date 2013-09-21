@@ -625,6 +625,7 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
 
  * Using uint16_t instead of uint32_t on line 87 in src/raw.cc for a value
    that is out of range
+ * raw::SocketWrap::pause() only uses the first argument
 
 # Roadmap
 
