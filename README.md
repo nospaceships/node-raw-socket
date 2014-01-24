@@ -631,11 +631,6 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
 
 # Roadmap
 
-In no particular order:
-
- * Enhance performance by moving the send queue into the C++ raw::SocketWrap
-   class
-
 Suggestions and requirements should be sent to <stephen.vickers.sv@gmail.com>.
 
 # License
