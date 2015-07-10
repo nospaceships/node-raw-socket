@@ -54,6 +54,15 @@ privileged users.  If this is the case an exception will be thrown on socket
 creation using a message similar to `Operation not permitted` (this message
 is likely to be different depending on operating system version).
 
+For MAC OS X platforms, when raw socket creation fails, this module will
+re-attempt to create a socket using the `SOCK_DGRAM` socket type for when the
+protocol specified is `IPPROTO_ICMP` before throwing an exception.  This
+interface on the MAC OS X platform provides non-privileged users access to the
+ICMP protocol without requiring root-level access.  More information on this
+subject can be found in the MAC OS X [documentation][mac-osx-icmp-ref].
+
+[mac-osx-icmp-ref]: https://developer.apple.com/library/mac/documentation/Darwin/Reference/Manpages/man4/icmp.4.html
+
 The appropriate operating system documentation should be consulted to
 understand how raw sockets will behave before attempting to use this module.
 
@@ -194,6 +203,10 @@ system, it is provided in convenience to be synonymous with IPv4*
 For Windows platforms the following constant is also defined:
 
  * `IPV6_HDRINCL`
+
+For Linux platforms the following constant is also defined:
+
+ * `SO_BINDTODEVICE`
 
 # Using This Module
 
@@ -632,6 +645,10 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
 ## Version 1.3.0 - 10/07/2015
 
  * Support Node.js 0.12.x using the Native Abstractions for Node interface
+ * Added export for the `SO_BINDTODEVICE` socket option for Linux platforms
+ * On MAC OS X platforms re-attempt to create a socket using `SOCK_DGRAM`
+   instead of `SOCK_RAW` when `IPPROTO_ICMP` was requested by the user, this
+   provides non-privileged users access to the ICMP protocol on this platform
 
 # Roadmap
 

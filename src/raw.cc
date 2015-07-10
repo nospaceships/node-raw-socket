@@ -231,6 +231,10 @@ void ExportConstants (Handle<Object> target) {
 	socket_option->Set (NanNew<String>("SO_SNDBUF"), NanNew<Number>(SO_SNDBUF));
 	socket_option->Set (NanNew<String>("SO_SNDTIMEO"), NanNew<Number>(SO_SNDTIMEO));
 
+#ifdef __linux__
+	socket_option->Set (NanNew<String>("SO_BINDTODEVICE"), NanNew<Number>(SO_BINDTODEVICE));
+#endif
+
 	socket_option->Set (NanNew<String>("IP_HDRINCL"), NanNew<Number>(IP_HDRINCL));
 	socket_option->Set (NanNew<String>("IP_OPTIONS"), NanNew<Number>(IP_OPTIONS));
 	socket_option->Set (NanNew<String>("IP_TOS"), NanNew<Number>(IP_TOS));
@@ -309,8 +313,24 @@ int SocketWrap::CreateSocket (void) {
 	if (this->poll_initialised_)
 		return 0;
 	
-	if ((this->poll_fd_ = socket (this->family_, SOCK_RAW, this->protocol_))
-			== INVALID_SOCKET)
+	this->poll_fd_ = socket (this->family_, SOCK_RAW, this->protocol_;
+	
+#ifdef __APPLE__
+	/**
+	 ** On MAC OS X platforms for non-privileged users wishing to utilise ICMP
+	 ** a SOCK_DGRAM will be enough, so try to create this type of socket in
+	 ** the case ICMP was requested.
+	 **
+	 ** More information can be found at:
+	 **
+	 **  https://developer.apple.com/library/mac/documentation/Darwin/Reference/Manpages/man4/icmp.4.html
+	 **
+	 **/
+	if (this->poll_fd_ == INVALID_SOCKET && this->protocol_ == IPPROTO_ICMP)
+		this->poll_fd_ = socket (this->family_, SOCK_DGRAM, this->protocol_;
+#endif
+
+	if (this->poll_fd_ == INVALID_SOCKET)
 		return SOCKET_ERRNO;
 
 #ifdef _WIN32
