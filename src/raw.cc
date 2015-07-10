@@ -313,7 +313,7 @@ int SocketWrap::CreateSocket (void) {
 	if (this->poll_initialised_)
 		return 0;
 	
-	this->poll_fd_ = socket (this->family_, SOCK_RAW, this->protocol_;
+	this->poll_fd_ = socket (this->family_, SOCK_RAW, this->protocol_);
 	
 #ifdef __APPLE__
 	/**
