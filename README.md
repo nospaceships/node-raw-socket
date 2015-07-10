@@ -629,6 +629,10 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
  * Delete uv_poll_t watcher in uv_close() OnClose callback instead of in the
    wrapped C++ objects deconstructor
 
+## Version 1.3.0 - 10/07/2015
+
+ * Support Node.js 0.12.x using the Native Abstractions for Node interface
+
 # Roadmap
 
 Suggestions and requirements should be sent to <stephen.vickers.sv@gmail.com>.
