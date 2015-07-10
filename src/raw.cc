@@ -222,8 +222,8 @@ void ExportConstants (Handle<Object> target) {
 	target->Set (NanNew<String>("SocketOption"), socket_option);
 
 	socket_level->Set (NanNew<String>("SOL_SOCKET"), NanNew<Number>(SOL_SOCKET));
-	socket_level->Set (NanNew<String>("IPPROTO_IP"), NanNew<Number>(IPPROTO_IP));
-	socket_level->Set (NanNew<String>("IPPROTO_IPV6"), NanNew<Number>(IPPROTO_IPV6));
+	socket_level->Set (NanNew<String>("IPPROTO_IP"), NanNew<Number>(IPPROTO_IP + 0));
+	socket_level->Set (NanNew<String>("IPPROTO_IPV6"), NanNew<Number>(IPPROTO_IPV6 + 0));
 
 	socket_option->Set (NanNew<String>("SO_BROADCAST"), NanNew<Number>(SO_BROADCAST));
 	socket_option->Set (NanNew<String>("SO_RCVBUF"), NanNew<Number>(SO_RCVBUF));
