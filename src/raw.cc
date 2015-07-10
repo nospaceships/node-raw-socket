@@ -327,7 +327,7 @@ int SocketWrap::CreateSocket (void) {
 	 **
 	 **/
 	if (this->poll_fd_ == INVALID_SOCKET && this->protocol_ == IPPROTO_ICMP)
-		this->poll_fd_ = socket (this->family_, SOCK_DGRAM, this->protocol_;
+		this->poll_fd_ = socket (this->family_, SOCK_DGRAM, this->protocol_);
 #endif
 
 	if (this->poll_fd_ == INVALID_SOCKET)
