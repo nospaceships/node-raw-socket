@@ -650,6 +650,10 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
    instead of `SOCK_RAW` when `IPPROTO_ICMP` was requested by the user, this
    provides non-privileged users access to the ICMP protocol on this platform
 
+## Version 1.3.1 - 10/07/2015
+
+ * Missing bracket for when compiling under the MAC OS X platform :(
+
 # Roadmap
 
 Suggestions and requirements should be sent to <stephen.vickers.sv@gmail.com>.
