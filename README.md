@@ -654,6 +654,11 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
 
  * Missing bracket for when compiling under the MAC OS X platform :(
 
+## Version 1.3.2 - 03/08/2015
+
+ * Add version dependency "<2.0.0" for the "nan" module to prevent build
+   failures during installation because of breaking API changes
+
 # Roadmap
 
 Suggestions and requirements should be sent to <stephen.vickers.sv@gmail.com>.
