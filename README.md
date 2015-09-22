@@ -658,7 +658,7 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
  * Add version dependency "<2.0.0" for the "nan" module to prevent build
    failures during installation because of breaking API changes
 
-## Version 1.4.0 - 22/09/2015
+## Version 1.3.3 - 22/09/2015
 
  * Host repository on GitHub
 
