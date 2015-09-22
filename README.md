@@ -1,5 +1,5 @@
 
-# raw-socket - [homepage][homepage]
+# raw-socket 
 
 This module implements raw sockets for [Node.js][nodejs].
 
@@ -32,7 +32,6 @@ Raw sockets can then be created, and data sent using [Node.js][nodejs]
             console.log (error.toString ());
     });
 
-[homepage]: http://re-tool.org "Homepage"
 [nodejs]: http://nodejs.org "Node.js"
 [net-ping]: https://npmjs.org/package/net-ping "net-ping"
 [npm]: https://npmjs.org/ "npm"
@@ -658,6 +657,10 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
 
  * Add version dependency "<2.0.0" for the "nan" module to prevent build
    failures during installation because of breaking API changes
+
+## Version 1.4.0 - 22/09/2015
+
+ * Host repository on GitHub
 
 # Roadmap
 
