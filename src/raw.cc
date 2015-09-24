@@ -43,7 +43,7 @@ static uint16_t checksum (uint16_t start_with, unsigned char *buffer,
 
 namespace raw {
 
-Nan::Persistent<FunctionTemplate> SocketWrap_constructor;
+static Nan::Persistent<FunctionTemplate> SocketWrap_constructor;
 
 void InitAll (Handle<Object> exports) {
 	ExportConstants (exports);
