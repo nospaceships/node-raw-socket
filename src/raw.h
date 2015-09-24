@@ -19,6 +19,8 @@
 #include <string>
 
 #include <node.h>
+#include <node_buffer.h>
+#include <nan.h>
 
 #ifdef _WIN32
 #include <winsock2.h>
@@ -57,10 +59,10 @@ NAN_METHOD(Htons);
 NAN_METHOD(Ntohl);
 NAN_METHOD(Ntohs);
 
-class SocketWrap : public node::ObjectWrap {
+class SocketWrap : public Nan::ObjectWrap {
 public:
 	void HandleIOEvent (int status, int revents);
-	static void Init ();
+	static void Init (Handle<Object> exports);
 
 private:
 	SocketWrap ();
