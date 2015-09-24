@@ -296,13 +296,15 @@ void SocketWrap::CloseSocket (void) {
 		this->poll_initialised_ = false;
 	}
 
-	Local<Value> emit = handle()->Get(Nan::New<String>("emit").ToLocalChecked());
-	Local<Function> cb = emit.As<Function> ();
+	if (! this->deconstructing_) {
+		Local<Value> emit = handle()->Get(Nan::New<String>("emit").ToLocalChecked());
+		Local<Function> cb = emit.As<Function> ();
 
-	Local<Value> args[1];
-	args[0] = Nan::New<String>("close").ToLocalChecked();
+		Local<Value> args[1];
+		args[0] = Nan::New<String>("close").ToLocalChecked();
 
-	cb->Call (handle(), 1, args);
+		cb->Call (handle(), 1, args);
+	}
 }
 
 int SocketWrap::CreateSocket (void) {
