@@ -662,6 +662,13 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
 
  * Host repository on GitHub
 
+## Version 1.4.0 - 09/10/2015
+
+ * Support Native Abstractions for Node 2.x
+ * Add-on module crashes when emitting `close` events during garbage collection
+   of a wrapped object
+ * Support Node.js 4.x
+
 # Roadmap
 
 Suggestions and requirements should be sent to <stephen.vickers.sv@gmail.com>.
