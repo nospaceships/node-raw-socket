@@ -669,6 +669,10 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
    of a wrapped object
  * Support Node.js 4.x
 
+## Version 1.5.0 - 15/05/2016
+
+ * Require nan 2.3.x to support node version 6
+
 # Roadmap
 
 Suggestions and requirements should be sent to <stephen.vickers.sv@gmail.com>.
