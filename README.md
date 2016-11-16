@@ -673,6 +673,10 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
 
  * Require nan 2.3.x to support node version 6
 
+## Version 1.5.1 - 16/11/2016
+
+ * Explicitly publish to npm using UNIX line endings
+
 # Roadmap
 
 Suggestions and requirements should be sent to <stephen.vickers.sv@gmail.com>.
