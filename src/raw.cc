@@ -230,6 +230,9 @@ void ExportConstants (Handle<Object> target) {
 	Nan::Set(socket_option, Nan::New("IP_OPTIONS").ToLocalChecked(), Nan::New<Number>(IP_OPTIONS));
 	Nan::Set(socket_option, Nan::New("IP_TOS").ToLocalChecked(), Nan::New<Number>(IP_TOS));
 	Nan::Set(socket_option, Nan::New("IP_TTL").ToLocalChecked(), Nan::New<Number>(IP_TTL));
+	Nan::Set(socket_option, Nan::New("IP_MTU_DISCOVER").ToLocalChecked(), Nan::New<Number>(IP_MTU_DISCOVER));
+	Nan::Set(socket_option, Nan::New("IP_PMTUDISC_DO").ToLocalChecked(), Nan::New<Number>(IP_PMTUDISC_DO));
+	Nan::Set(socket_option, Nan::New("IP_PMTUDISC_DONT").ToLocalChecked(), Nan::New<Number>(IP_PMTUDISC_DONT));
 
 #ifdef _WIN32
 	Nan::Set(socket_option, Nan::New("IPV6_HDRINCL").ToLocalChecked(), Nan::New<Number>(IPV6_HDRINCL));
