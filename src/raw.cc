@@ -261,7 +261,10 @@ void SocketWrap::Init (Handle<Object> exports) {
 	Nan::SetPrototypeMethod(tpl, "recv", Recv);
 	Nan::SetPrototypeMethod(tpl, "send", Send);
 	Nan::SetPrototypeMethod(tpl, "setOption", SetOption);
-
+	Nan::SetPrototypeMethod(tpl, "bindToAddress", BindToAddress);
+#ifdef __linux__
+	Nan::SetPrototypeMethod(tpl, "bindToDevice", BindToDevice);
+#endif
 	SocketWrap_constructor.Reset(tpl);
 	exports->Set(Nan::New("SocketWrap").ToLocalChecked(),
 			Nan::GetFunction(tpl).ToLocalChecked());
@@ -353,6 +356,73 @@ int SocketWrap::CreateSocket (void) {
 	
 	return 0;
 }
+
+NAN_METHOD(SocketWrap::BindToAddress) {
+	Nan::HandleScope scope;
+
+	int rc;
+	sockaddr_in sin_address;
+	sockaddr_in6 sin6_address;
+
+	if (info.Length () < 1) {
+		Nan::ThrowError("One argument is required");
+		return;
+	}
+
+	SocketWrap* socket = SocketWrap::Unwrap<SocketWrap> (info.This ());
+
+	if (socket->family_ == AF_INET6) {
+#if UV_VERSION_MAJOR > 0
+		uv_ip6_addr(*Nan::Utf8String(info[0]), 0, &sin6_address);
+#else
+		String::Utf8String address (args[0]);
+		sin6_address = uv_ip6_addr (*address, 0);
+#endif
+		rc = bind (socket->poll_fd_, (sockaddr *) &sin6_address, sizeof(sin6_address));
+	} else {
+#if UV_VERSION_MAJOR > 0
+		uv_ip4_addr(*Nan::Utf8String(info[0]), 0, &sin_address);
+#else
+		String::Utf8String address (args[0]);
+		sin_address = uv_ip4_addr (*address, 0);
+#endif
+		rc = bind (socket->poll_fd_, (sockaddr *)&sin_address, sizeof(sin_address));
+	}
+
+	if (rc == SOCKET_ERROR) {
+		Nan::ThrowError(raw_strerror(SOCKET_ERRNO));
+		return;
+	}
+}
+
+#ifdef __linux__
+NAN_METHOD(SocketWrap::BindToDevice) {
+	Nan::HandleScope scope;
+
+	SocketWrap* socket = SocketWrap::Unwrap<SocketWrap> (info.This ());
+
+	if (info.Length () < 1) {
+		Nan::ThrowError("One argument is required");
+		return;
+	}
+
+	char *device = *Nan::Utf8String(info[0]);
+	size_t len = strlen(device);
+
+	if (len < 1) {
+		Nan::ThrowError("Device name is empty");
+		return;
+	}
+
+	int rc = setsockopt (socket->poll_fd_,
+		SOL_SOCKET, SO_BINDTODEVICE, device, len);
+
+	if (rc == SOCKET_ERROR) {
+		Nan::ThrowError(raw_strerror(SOCKET_ERRNO));
+		return;
+	}
+}
+#endif
 
 NAN_METHOD(SocketWrap::GetOption) {
 	Nan::HandleScope scope;
