@@ -687,6 +687,7 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
 
  * Add note to README.md on how to reduce packet loss using the `SO_RCVBUF`
    socket option
+ * Address warnings for `v8::Value::ToUint32 was declared deprecated`
 
 # Roadmap
 
