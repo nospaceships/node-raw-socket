@@ -65,6 +65,12 @@ subject can be found in the MAC OS X [documentation][mac-osx-icmp-ref].
 The appropriate operating system documentation should be consulted to
 understand how raw sockets will behave before attempting to use this module.
 
+# Packet Loss Under Load
+
+Under load raw socket can experience packet loss, this may vary from system to
+system depending on hardware.  On some systems the `SO_RCVBUF` socket option to
+will help to alleviate packet loss.
+
 # Keeping The [Node.js][nodejs] Event Loop Alive
 
 This module uses the `libuv` library to integrate into the [Node.js][nodejs]
@@ -676,6 +682,11 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
 ## Version 1.5.1 - 16/11/2016
 
  * Explicitly publish to npm using UNIX line endings
+
+## Version 1.5.2 - 11/01/2018
+
+ * Add note to README.md on how to reduce packet loss using the `SO_RCVBUF`
+   socket option
 
 # Roadmap
 
