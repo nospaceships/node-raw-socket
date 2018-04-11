@@ -53,6 +53,10 @@ privileged users.  If this is the case an exception will be thrown on socket
 creation using a message similar to `Operation not permitted` (this message
 is likely to be different depending on operating system version).
 
+For linux platforms, raw sockets can be created by a program that have the
+`cap_net_raw` capability. It can be given to node with the following
+command: `setcap cap_net_raw=pe /path/to/node`.
+
 For MAC OS X platforms, when raw socket creation fails, this module will
 re-attempt to create a socket using the `SOCK_DGRAM` socket type for when the
 protocol specified is `IPPROTO_ICMP` before throwing an exception.  This
@@ -331,6 +335,9 @@ items:
  * `checksumOffset` - When `generateChecksums` is `true` specifies how many
    bytes to index into the send buffer to write automatically generated
    checksums, defaults to `0`
+ * `bindToAddress` - An ip address to bind the socket to.
+ * `bindToDevice` - (linux only) A device name to bind the socket to.
+
 
 An exception will be thrown if the underlying raw socket could not be created.
 The error will be an instance of the `Error` class.
@@ -527,6 +534,17 @@ The previous example can be re-written to use this form:
 
     socket.setOption (level, option, 1);
 
+## socket.bindToAddress (address)
+
+The `bindToAddress()` method binds the socket to the specified ip address,
+using the operating system `bind()` function.
+
+## socket.bindToDevice (device)
+
+The `bindToDevice()` method is only availble on linux platforms, and
+binds the socket to the specified device, using the operating system
+`setsockopt (socket, SOL_SOCKET, SO_BINDTODEVICE, device, device.length);`
+
 # Example Programs
 
 Example programs are included under the modules `example` directory.
@@ -688,6 +706,9 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
  * Add note to README.md on how to reduce packet loss using the `SO_RCVBUF`
    socket option
  * Address warnings for `v8::Value::ToUint32 was declared deprecated`
+
+## Version 1.5.2-somec - 10/04/2018
+ * Added bindToAddress and bindToDevice
 
 # Roadmap
 

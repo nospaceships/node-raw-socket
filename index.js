@@ -53,6 +53,14 @@ function Socket (options) {
 					: AddressFamily.IPv4)
 		);
 
+  if (options && options.bindToDevice && this.bindToDevice) {
+    this.bindToDevice(options.bindToDevice);
+  }
+
+  if (options && options.bindToAddress) {
+		this.bindToAddress(options.bindToAddress);
+  }
+
 	var me = this;
 	this.wrap.on ("sendReady", this.onSendReady.bind (me));
 	this.wrap.on ("recvReady", this.onRecvReady.bind (me));
@@ -69,6 +77,16 @@ Socket.prototype.close = function () {
 
 Socket.prototype.getOption = function (level, option, value, length) {
 	return this.wrap.getOption (level, option, value, length);
+}
+
+if (raw.SocketOption.SO_BINDTODEVICE) {
+	Socket.prototype.bindToDevice = function (device) {
+		return this.wrap.bindToDevice (device);
+	}
+}
+
+Socket.prototype.bindToAddress = function (address) {
+	return this.wrap.bindToAddress (address);
 }
 
 Socket.prototype.onClose = function () {
