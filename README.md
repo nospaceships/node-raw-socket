@@ -689,6 +689,10 @@ Bug reports should be sent to <stephen.vickers.sv@gmail.com>.
    socket option
  * Address warnings for `v8::Value::ToUint32 was declared deprecated`
 
+## Version 1.6.0 - 02/05/2018
+
+ * Support Node.js 10
+
 # Roadmap
 
 Suggestions and requirements should be sent to <stephen.vickers.sv@gmail.com>.
