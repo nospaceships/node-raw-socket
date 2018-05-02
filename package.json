@@ -7,13 +7,13 @@
     "example": "example"
   },
   "dependencies": {
-    "nan": "2.3.*"
+    "nan": "2.10.*"
   },
-  "contributors": [ 
+  "contributors": [
     {
       "name": "Stephen Vickers",
       "email": "stephen.vickers.sv@gmail.com"
-    } 
+    }
   ],
   "repository": {
     "type": "git",
