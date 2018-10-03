@@ -1,7 +1,7 @@
 
 var events = require ("events");
 var net = require ("net");
-var raw = require ("./build/Release/raw");
+var raw = require ("./build/Release/raw.node");
 var util = require ("util");
 
 function _expandConstantObject (object) {
