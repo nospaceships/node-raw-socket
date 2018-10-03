@@ -695,6 +695,10 @@ Example programs are included under the modules `example` directory.
 
  * Remove redundant sections from README.md
 
+## Version 1.6.3 - 03/10/2018
+
+ * Include addon `.node` file extension for node-webkit compatibility
+
 # License
 
 Copyright (c) 2018 NoSpaceships Ltd <hello@nospaceships.com>
