@@ -517,7 +517,7 @@ NAN_METHOD(SocketWrap::Pause) {
 	int events = (pause_recv ? 0 : UV_READABLE)
 			| (pause_send ? 0 : UV_WRITABLE);
 
-	if (! socket->deconstructing_) {
+	if (! socket->deconstructing_ && socket->poll_initialised_) {
 		uv_poll_stop (socket->poll_watcher_);
 		if (events)
 			uv_poll_start (socket->poll_watcher_, events, IoEvent);
