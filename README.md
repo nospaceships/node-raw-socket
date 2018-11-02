@@ -699,6 +699,10 @@ Example programs are included under the modules `example` directory.
 
  * Include addon `.node` file extension for node-webkit compatibility
 
+## Version 1.6.4 - 02/11/2018
+
+ * Prevent assertion failures when closing a socket and calling pauseRecv()
+
 # License
 
 Copyright (c) 2018 NoSpaceships Ltd <hello@nospaceships.com>
