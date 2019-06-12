@@ -51,8 +51,8 @@ namespace raw {
 
 NAN_METHOD(CreateChecksum);
 
-void ExportConstants (Handle<Object> target);
-void ExportFunctions (Handle<Object> target);
+void ExportConstants (Local<Object> target);
+void ExportFunctions (Local<Object> target);
 
 NAN_METHOD(Htonl);
 NAN_METHOD(Htons);
@@ -62,7 +62,7 @@ NAN_METHOD(Ntohs);
 class SocketWrap : public Nan::ObjectWrap {
 public:
 	void HandleIOEvent (int status, int revents);
-	static void Init (Handle<Object> exports);
+	static void Init (Local<Object> exports);
 
 private:
 	SocketWrap ();

@@ -9,7 +9,7 @@ var options = {
 var socket = raw.createSocket (options);
 
 socket.setOption (raw.SocketLevel.IPPROTO_IP, raw.SocketOption.IP_HDRINCL,
-		new Buffer ([0x00, 0x00, 0x00, 0x01]), 4);
+		Buffer.from([0x00, 0x00, 0x00, 0x01]), 4);
 
 socket.on ("close", function () {
 	console.log ("socket closed");
@@ -27,7 +27,7 @@ socket.on ("message", function (buffer, source) {
 });
 
 // ICMP echo (ping) request (the source IP address used may not match yours)
-var buffer = new Buffer ([
+var buffer = Buffer.from([
 		0x60, 0x00, 0x00, 0x00, 0x00, 0x28, 0x3a, 0x80,
 		0xfe, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 		0xbd, 0x78, 0xaa, 0x46, 0x59, 0x6b, 0xb1, 0x5e,

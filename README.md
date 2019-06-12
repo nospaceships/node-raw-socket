@@ -703,6 +703,10 @@ Example programs are included under the modules `example` directory.
 
  * Prevent assertion failures when closing a socket and calling pauseRecv()
 
+## Version 1.7.0 - 12/06/2019
+
+ * Support Node.js 12 using nan 2.14
+
 # License
 
 Copyright (c) 2018 NoSpaceships Ltd <hello@nospaceships.com>

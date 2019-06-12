@@ -37,7 +37,7 @@ function Socket (options) {
 	Socket.super_.call (this);
 
 	this.requests = [];
-	this.buffer = new Buffer ((options && options.bufferSize)
+	this.buffer = Buffer.alloc((options && options.bufferSize)
 			? options.bufferSize
 			: 4096);
 

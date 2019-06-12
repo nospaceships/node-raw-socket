@@ -1,13 +1,13 @@
 {
   "name": "raw-socket",
-  "version": "1.6.4",
+  "version": "1.7.0",
   "description": "Raw sockets for Node.js.",
   "main": "index.js",
   "directories": {
     "example": "example"
   },
   "dependencies": {
-    "nan": "2.10.*"
+    "nan": "2.14.*"
   },
   "contributors": [
     {

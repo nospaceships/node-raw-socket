@@ -18,7 +18,7 @@ var options = {
 
 var socket = raw.createSocket (options);
 
-var buffer = new Buffer (4096);
+var buffer = Buffer.alloc(4096);
 var len = socket.getOption (level, option, buffer, buffer.length);
 
 socket.pauseSend ().pauseRecv ();
