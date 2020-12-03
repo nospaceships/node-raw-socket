@@ -305,7 +305,7 @@ int SocketWrap::CreateSocket (void) {
 	
 	this->poll_fd_ = socket (this->family_, SOCK_RAW, this->protocol_);
 	
-#ifdef __APPLE__
+#if defined (__APPLE__) || defined(__linux__)
 	/**
 	 ** On MAC OS X platforms for non-privileged users wishing to utilise ICMP
 	 ** a SOCK_DGRAM will be enough, so try to create this type of socket in
