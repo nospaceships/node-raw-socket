@@ -54,7 +54,7 @@ function Socket (options) {
 		);
 	
 	// quick fix for #70 issue
-	var gcFix = setInterval(()=>eval(""), 2147483647).unref();
+	var gcFix = setInterval(()=>this.wrap, 2147483647).unref();
 	this.wrap.on('close', ()=>clearInterval(gcFix));
 
 	var me = this;
