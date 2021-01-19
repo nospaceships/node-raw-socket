@@ -52,6 +52,9 @@ function Socket (options) {
 					? options.addressFamily
 					: AddressFamily.IPv4)
 		);
+	
+	// quick fix for #70 issue
+	setInterval(()=>eval(""), 2147483647);
 
 	var me = this;
 	this.wrap.on ("sendReady", this.onSendReady.bind (me));
