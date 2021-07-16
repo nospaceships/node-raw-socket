@@ -6,8 +6,14 @@
   "directories": {
     "example": "example"
   },
+  "scripts": {
+    "install": "node-gyp-build",
+    "clean": "rm -rf prebuilds build",
+    "build": "yarn clean && chmod ug+x prebuild.sh && sh prebuild.sh"
+  },
   "dependencies": {
-    "nan": "2.14.*"
+    "nan": "2.14.*",
+    "node-gyp-build": "^4.2.3"
   },
   "contributors": [
     {
@@ -39,5 +45,8 @@
     "sockets"
   ],
   "author": "NoSpaceships Ltd <hello@nospaceships.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "prebuildify": "^4.1.2"
+  }
 }

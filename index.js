@@ -1,7 +1,7 @@
 
 var events = require ("events");
 var net = require ("net");
-var raw = require ("./build/Release/raw.node");
+var raw = require('node-gyp-build')(__dirname);
 var util = require ("util");
 
 function _expandConstantObject (object) {
