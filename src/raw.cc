@@ -45,16 +45,19 @@ namespace raw {
 
 static Napi::FunctionReference SocketWrap_constructor;
 
-void InitAll (Napi::Object exports) {
-	ExportConstants (exports);
-	ExportFunctions (exports);
+Napi::Object InitAll (Napi::Env env, Napi::Object exports) {
+	ExportConstants (env, exports);
+	ExportFunctions (env, exports);
 
-	SocketWrap::Init (exports);
+	SocketWrap::Init (env, exports);
+
+	return exports;
 }
 
 NODE_API_MODULE(raw, InitAll)
 
 Napi::Value CreateChecksum(const Napi::CallbackInfo& info) {
+	Napi::Env env = info.Env();
 	Napi::HandleScope scope(env);
 	
 	if (info.Length () < 2) {
@@ -126,6 +129,7 @@ Napi::Value CreateChecksum(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Htonl(const Napi::CallbackInfo& info) {
+	Napi::Env env = info.Env();
 	Napi::HandleScope scope(env);
 
 	if (info.Length () < 1) {
@@ -147,6 +151,7 @@ Napi::Value Htonl(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Htons(const Napi::CallbackInfo& info) {
+	Napi::Env env = info.Env();
 	Napi::HandleScope scope(env);
 	
 	if (info.Length () < 1) {
@@ -175,6 +180,7 @@ Napi::Value Htons(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Ntohl(const Napi::CallbackInfo& info) {
+	Napi::Env env = info.Env();
 	Napi::HandleScope scope(env);
 	
 	if (info.Length () < 1) {
@@ -196,6 +202,7 @@ Napi::Value Ntohl(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value Ntohs(const Napi::CallbackInfo& info) {
+	Napi::Env env = info.Env();
 	Napi::HandleScope scope(env);
 	
 	if (info.Length () < 1) {
@@ -223,7 +230,7 @@ Napi::Value Ntohs(const Napi::CallbackInfo& info) {
 	return converted;
 }
 
-void ExportConstants (Napi::Object target) {
+void ExportConstants (Napi::Env env, Napi::Object target) {
 	Napi::Object socket_level = Napi::Object::New(env);
 	Napi::Object socket_option = Napi::Object::New(env);
 
@@ -257,7 +264,7 @@ void ExportConstants (Napi::Object target) {
 	(socket_option).Set(Napi::String::New(env, "IPV6_V6ONLY"), Napi::Number::New(env, IPV6_V6ONLY));
 }
 
-void ExportFunctions (Napi::Object target) {
+void ExportFunctions (Napi::Env env, Napi::Object target) {
 	(target).Set(Napi::String::New(env, "createChecksum"), Napi::GetFunction(Napi::Function::New(env, CreateChecksum)));
 	
 	(target).Set(Napi::String::New(env, "htonl"), Napi::GetFunction(Napi::Function::New(env, Htonl)));
@@ -266,7 +273,7 @@ void ExportFunctions (Napi::Object target) {
 	(target).Set(Napi::String::New(env, "ntohs"), Napi::GetFunction(Napi::Function::New(env, Ntohs)));
 }
 
-void SocketWrap::Init (Napi::Object exports) {
+void SocketWrap::Init (Napi::Env env, Napi::Object exports) {
 	Napi::HandleScope scope(env);
 
 	Napi::FunctionReference tpl = Napi::Function::New(env, SocketWrap::New);
@@ -281,7 +288,7 @@ void SocketWrap::Init (Napi::Object exports) {
 	InstanceMethod("setOption", &SetOption),
 
 	SocketWrap_constructor.Reset(tpl);
-	(exports).Set(Napi::String::New(env, "SocketWrap"), Napi::GetFunction(tpl));
+	(exports).Set(Napi::String::New(env, "SocketWrap"), tpl);
 }
 
 SocketWrap::SocketWrap () {
@@ -294,6 +301,7 @@ SocketWrap::~SocketWrap () {
 }
 
 Napi::Value SocketWrap::Close(const Napi::CallbackInfo& info) {
+	Napi::Env env = info.Env();
 	Napi::HandleScope scope(env);
 	
 	SocketWrap* socket = SocketWrap::Unwrap<SocketWrap> (info.This ());
@@ -365,6 +373,7 @@ int SocketWrap::CreateSocket (void) {
 }
 
 Napi::Value SocketWrap::GetOption(const Napi::CallbackInfo& info) {
+	Napi::Env env = info.Env();
 	Napi::HandleScope scope(env);
 	
 	SocketWrap* socket = SocketWrap::Unwrap<SocketWrap> (info.This ());
@@ -454,6 +463,7 @@ void SocketWrap::HandleIOEvent (int status, int revents) {
 }
 
 Napi::Value SocketWrap::New(const Napi::CallbackInfo& info) {
+	Napi::Env env = info.Env();
 	Napi::HandleScope scope(env);
 	
 	SocketWrap* socket = new SocketWrap ();
@@ -507,6 +517,7 @@ void SocketWrap::OnClose (uv_handle_t *handle) {
 }
 
 Napi::Value SocketWrap::Pause(const Napi::CallbackInfo& info) {
+	Napi::Env env = info.Env();
 	Napi::HandleScope scope(env);
 	
 	SocketWrap* socket = SocketWrap::Unwrap<SocketWrap> (info.This ());
@@ -544,6 +555,7 @@ Napi::Value SocketWrap::Pause(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value SocketWrap::Recv(const Napi::CallbackInfo& info) {
+	Napi::Env env = info.Env();
 	Napi::HandleScope scope(env);
 	
 	SocketWrap* socket = SocketWrap::Unwrap<SocketWrap> (info.This ());
@@ -624,6 +636,7 @@ Napi::Value SocketWrap::Recv(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value SocketWrap::Send(const Napi::CallbackInfo& info) {
+	Napi::Env env = info.Env();
 	Napi::HandleScope scope(env);
 	
 	SocketWrap* socket = SocketWrap::Unwrap<SocketWrap> (info.This ());
@@ -723,6 +736,7 @@ Napi::Value SocketWrap::Send(const Napi::CallbackInfo& info) {
 }
 
 Napi::Value SocketWrap::SetOption(const Napi::CallbackInfo& info) {
+	Napi::Env env = info.Env();
 	Napi::HandleScope scope(env);
 	
 	SocketWrap* socket = SocketWrap::Unwrap<SocketWrap> (info.This ());

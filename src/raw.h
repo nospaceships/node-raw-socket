@@ -53,8 +53,8 @@ namespace raw {
 
 Napi::Value CreateChecksum(const Napi::CallbackInfo& info);
 
-void ExportConstants (Napi::Object target);
-void ExportFunctions (Napi::Object target);
+void ExportConstants (Napi::Env env, Napi::Object target);
+void ExportFunctions (Napi::Env env, Napi::Object target);
 
 Napi::Value Htonl(const Napi::CallbackInfo& info);
 Napi::Value Htons(const Napi::CallbackInfo& info);
@@ -64,7 +64,7 @@ Napi::Value Ntohs(const Napi::CallbackInfo& info);
 class SocketWrap : public Napi::ObjectWrap<SocketWrap> {
 public:
 	void HandleIOEvent (int status, int revents);
-	static void Init (Napi::Object exports);
+	static void Init (Napi::Env env, Napi::Object exports);
 
 private:
 	SocketWrap ();
