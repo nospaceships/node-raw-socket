@@ -63,13 +63,13 @@ Napi::Value CreateChecksum(const Napi::CallbackInfo& info) {
 	if (info.Length () < 2) {
 		Napi::Error::New(env, "At least one argument is required").ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 
 	if (! info[0].IsNumber ()) {
 		Napi::TypeError::New(env, "Start with argument must be an unsigned integer").ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 	
 	uint32_t start_with = info[0].As<Napi::Number>();
@@ -77,13 +77,13 @@ Napi::Value CreateChecksum(const Napi::CallbackInfo& info) {
 	if (start_with > 65535) {
 		Napi::RangeError::New(env, "Start with argument cannot be larger than 65535").ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 
 	if (! node::Buffer::HasInstance (info[1])) {
 		Napi::TypeError::New(env, "Buffer argument must be a node Buffer object").ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 	
 	Napi::Object buffer = info[1].As<Napi::Object>();
@@ -95,13 +95,13 @@ Napi::Value CreateChecksum(const Napi::CallbackInfo& info) {
 		if (! info[2].IsNumber ()) {
 			Napi::TypeError::New(env, "Offset argument must be an unsigned integer").ThrowAsJavaScriptException();
 
-			return;
+			return env.Undefined();
 		}
 		offset = info[2].As<Napi::Number>();
 		if (offset >= length) {
 			Napi::RangeError::New(env, "Offset argument must be smaller than length of the buffer").ThrowAsJavaScriptException();
 
-			return;
+			return env.Undefined();
 		}
 	}
 	
@@ -109,13 +109,13 @@ Napi::Value CreateChecksum(const Napi::CallbackInfo& info) {
 		if (! info[3].IsNumber ()) {
 			Napi::TypeError::New(env, "Length argument must be an unsigned integer").ThrowAsJavaScriptException();
 
-			return;
+			return env.Undefined();
 		}
 		unsigned int new_length = info[3].As<Napi::Number>();
 		if (new_length > length) {
 			Napi::RangeError::New(env, "Length argument must be smaller than length of the buffer").ThrowAsJavaScriptException();
 
-			return;
+			return env.Undefined();
 		}
 		length = new_length;
 	}
@@ -134,13 +134,13 @@ Napi::Value Htonl(const Napi::CallbackInfo& info) {
 	if (info.Length () < 1) {
 		Napi::Error::New(env, "One arguments is required").ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 
 	if (! info[0].IsNumber ()) {
 		Napi::TypeError::New(env, "Number must be a 32 unsigned integer").ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 
 	unsigned int number = info[0].As<Napi::Number>();
@@ -156,13 +156,13 @@ Napi::Value Htons(const Napi::CallbackInfo& info) {
 	if (info.Length () < 1) {
 		Napi::Error::New(env, "One arguments is required").ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 
 	if (! info[0].IsNumber ()) {
 		Napi::TypeError::New(env, "Number must be a 16 unsigned integer").ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 	
 	unsigned int number = info[0].As<Napi::Number>();
@@ -170,7 +170,7 @@ Napi::Value Htons(const Napi::CallbackInfo& info) {
 	if (number > 65535) {
 		Napi::RangeError::New(env, "Number cannot be larger than 65535").ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 	
 	Napi::Number converted = Napi::Number::New(env, htons (number));
@@ -185,13 +185,13 @@ Napi::Value Ntohl(const Napi::CallbackInfo& info) {
 	if (info.Length () < 1) {
 		Napi::Error::New(env, "One arguments is required").ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 
 	if (! info[0].IsNumber ()) {
 		Napi::TypeError::New(env, "Number must be a 32 unsigned integer").ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 
 	unsigned int number = info[0].As<Napi::Number>();
@@ -207,13 +207,13 @@ Napi::Value Ntohs(const Napi::CallbackInfo& info) {
 	if (info.Length () < 1) {
 		Napi::Error::New(env, "One arguments is required").ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 
 	if (! info[0].IsNumber ()) {
 		Napi::TypeError::New(env, "Number must be a 16 unsigned integer").ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 	
 	unsigned int number = info[0].As<Napi::Number>();
@@ -221,7 +221,7 @@ Napi::Value Ntohs(const Napi::CallbackInfo& info) {
 	if (number > 65535) {
 		Napi::RangeError::New(env, "Number cannot be larger than 65535").ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 	
 	Napi::Number converted = Napi::Number::New(env, ntohs (number));
@@ -380,19 +380,19 @@ Napi::Value SocketWrap::GetOption(const Napi::CallbackInfo& info) {
 	if (info.Length () < 3) {
 		Napi::Error::New(env, "Three arguments are required").ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 
 	if (! info[0].IsNumber ()) {
 		Napi::TypeError::New(env, "Level argument must be a number").ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 
 	if (! info[1].IsNumber ()) {
 		Napi::TypeError::New(env, "Option argument must be a number").ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 
 	int level = info[0].As<Napi::Number>();
@@ -404,7 +404,7 @@ Napi::Value SocketWrap::GetOption(const Napi::CallbackInfo& info) {
 	if (! node::Buffer::HasInstance (info[2])) {
 		Napi::TypeError::New(env, "Value argument must be a node Buffer object if length is provided").ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 	
 	Napi::Object buffer = info[2].As<Napi::Object>();
@@ -413,7 +413,7 @@ Napi::Value SocketWrap::GetOption(const Napi::CallbackInfo& info) {
 	if (! info[3].IsNumber ()) {
 		Napi::TypeError::New(env, "Length argument must be an unsigned integer").ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 
 	len = (SOCKET_LEN_TYPE) node::Buffer::Length (buffer);
@@ -424,7 +424,7 @@ Napi::Value SocketWrap::GetOption(const Napi::CallbackInfo& info) {
 	if (rc == SOCKET_ERROR) {
 		Napi::Error::New(env, raw_strerror (SOCKET_ERRNO)).ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 	
 	Napi::Number got = Napi::Number::New(env, len);
@@ -471,13 +471,13 @@ Napi::Value SocketWrap::New(const Napi::CallbackInfo& info) {
 	if (info.Length () < 1) {
 		Napi::Error::New(env, "One argument is required").ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 	
 	if (! info[0].IsNumber ()) {
 		Napi::TypeError::New(env, "Protocol argument must be an unsigned integer").ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	} else {
 		socket->protocol_ = info[0].As<Napi::Number>();
 	}
@@ -486,7 +486,7 @@ Napi::Value SocketWrap::New(const Napi::CallbackInfo& info) {
 		if (! info[1].IsNumber ()) {
 			Napi::TypeError::New(env, "Address family argument must be an unsigned integer").ThrowAsJavaScriptException();
 
-			return;
+			return env.Undefined();
 		} else {
 			if (uint32_t(info[1].As<Napi::Number>()) == 2)
 				family = AF_INET6;
@@ -503,7 +503,7 @@ Napi::Value SocketWrap::New(const Napi::CallbackInfo& info) {
 	if (rc != 0) {
 		Napi::Error::New(env, raw_strerror (rc)).ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 
 	socket->Wrap (info.This ());
@@ -524,20 +524,20 @@ Napi::Value SocketWrap::Pause(const Napi::CallbackInfo& info) {
 	if (info.Length () < 2) {
 		Napi::Error::New(env, "Two arguments are required").ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 	
 	if (! info[0].IsBoolean ()) {
 		Napi::TypeError::New(env, "Recv argument must be a boolean").ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 	bool pause_recv = info[0].As<Napi::Boolean>();
 
 	if (! info[1].IsBoolean ()) {
 		Napi::TypeError::New(env, "Send argument must be a boolean").ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 	bool pause_send = info[1].As<Napi::Boolean>();
 	
@@ -571,18 +571,18 @@ Napi::Value SocketWrap::Recv(const Napi::CallbackInfo& info) {
 	socklen_t sin_length = socket->family_ == AF_INET6
 			? sizeof (sin6_address)
 			: sizeof (sin_address);
-#endif
+#endif
 	
 	if (info.Length () < 2) {
 		Napi::Error::New(env, "Five arguments are required").ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 	
 	if (! node::Buffer::HasInstance (info[0])) {
 		Napi::TypeError::New(env, "Buffer argument must be a node Buffer object").ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	} else {
 		buffer = info[0].As<Napi::Object>();
 	}
@@ -590,14 +590,14 @@ Napi::Value SocketWrap::Recv(const Napi::CallbackInfo& info) {
 	if (! info[1].IsFunction ()) {
 		Napi::TypeError::New(env, "Callback argument must be a function").ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 
 	rc = socket->CreateSocket ();
 	if (rc != 0) {
 		Napi::Error::New(env, raw_strerror (errno)).ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 
 	if (socket->family_ == AF_INET6) {
@@ -615,7 +615,7 @@ Napi::Value SocketWrap::Recv(const Napi::CallbackInfo& info) {
 	if (rc == SOCKET_ERROR) {
 		Napi::Error::New(env, raw_strerror (SOCKET_ERRNO)).ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 	
 	if (socket->family_ == AF_INET6)
@@ -648,44 +648,44 @@ Napi::Value SocketWrap::Send(const Napi::CallbackInfo& info) {
 	if (info.Length () < 5) {
 		Napi::Error::New(env, "Five arguments are required").ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 	
 	if (! node::Buffer::HasInstance (info[0])) {
 		Napi::TypeError::New(env, "Buffer argument must be a node Buffer object").ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 	
 	if (! info[1].IsNumber ()) {
 		Napi::TypeError::New(env, "Offset argument must be an unsigned integer").ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 
 	if (! info[2].IsNumber ()) {
 		Napi::TypeError::New(env, "Length argument must be an unsigned integer").ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 
 	if (! info[3].IsString ()) {
 		Napi::TypeError::New(env, "Address argument must be a string").ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 
 	if (! info[4].IsFunction ()) {
 		Napi::TypeError::New(env, "Callback argument must be a function").ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 
 	rc = socket->CreateSocket ();
 	if (rc != 0) {
 		Napi::Error::New(env, raw_strerror (errno)).ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 	
 	buffer = info[0].As<Napi::Object>();
@@ -722,7 +722,7 @@ Napi::Value SocketWrap::Send(const Napi::CallbackInfo& info) {
 	if (rc == SOCKET_ERROR) {
 		Napi::Error::New(env, raw_strerror (SOCKET_ERRNO)).ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 	
 	Napi::Function cb = Napi::Function::Cast (info[4]);
@@ -743,19 +743,19 @@ Napi::Value SocketWrap::SetOption(const Napi::CallbackInfo& info) {
 	if (info.Length () < 3) {
 		Napi::Error::New(env, "Three or four arguments are required").ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 
 	if (! info[0].IsNumber ()) {
 		Napi::TypeError::New(env, "Level argument must be a number").ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 
 	if (! info[1].IsNumber ()) {
 		Napi::TypeError::New(env, "Option argument must be a number").ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 
 	int level = info[0].As<Napi::Number>();
@@ -768,7 +768,7 @@ Napi::Value SocketWrap::SetOption(const Napi::CallbackInfo& info) {
 		if (! node::Buffer::HasInstance (info[2])) {
 			Napi::TypeError::New(env, "Value argument must be a node Buffer object if length is provided").ThrowAsJavaScriptException();
 
-			return;
+			return env.Undefined();
 		}
 		
 		Napi::Object buffer = info[2].As<Napi::Object>();
@@ -777,7 +777,7 @@ Napi::Value SocketWrap::SetOption(const Napi::CallbackInfo& info) {
 		if (! info[3].IsNumber ()) {
 			Napi::TypeError::New(env, "Length argument must be an unsigned integer").ThrowAsJavaScriptException();
 
-			return;
+			return env.Undefined();
 		}
 
 		len = info[3].As<Napi::Number>();
@@ -785,13 +785,13 @@ Napi::Value SocketWrap::SetOption(const Napi::CallbackInfo& info) {
 		if (len > node::Buffer::Length (buffer)) {
 			Napi::TypeError::New(env, "Length argument is larger than buffer length").ThrowAsJavaScriptException();
 
-			return;
+			return env.Undefined();
 		}
 	} else {
 		if (! info[2].IsNumber ()) {
 			Napi::TypeError::New(env, "Value argument must be a unsigned integer").ThrowAsJavaScriptException();
 
-			return;
+			return env.Undefined();
 		}
 
 		ival = info[2].As<Napi::Number>();
@@ -804,7 +804,7 @@ Napi::Value SocketWrap::SetOption(const Napi::CallbackInfo& info) {
 	if (rc == SOCKET_ERROR) {
 		Napi::Error::New(env, raw_strerror(SOCKET_ERRNO)).ThrowAsJavaScriptException();
 
-		return;
+		return env.Undefined();
 	}
 	
 	return info.This();
