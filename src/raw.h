@@ -18,9 +18,11 @@
 
 #include <string>
 
-#include <node.h>
+#include <napi.h>
+#include <uv.h>
 #include <node_buffer.h>
-#include <nan.h>
+#include <napi.h>
+#include <uv.h>
 
 #ifdef _WIN32
 #include <winsock2.h>
@@ -45,45 +47,46 @@
 #define SOCKET_LEN_TYPE socklen_t
 #endif
 
-using namespace v8;
+using namespace Napi;
 
 namespace raw {
 
-NAN_METHOD(CreateChecksum);
+Napi::Value CreateChecksum(const Napi::CallbackInfo& info);
 
-void ExportConstants (Local<Object> target);
-void ExportFunctions (Local<Object> target);
+void ExportConstants (Napi::Env env, Napi::Object target);
+void ExportFunctions (Napi::Env env, Napi::Object target);
 
-NAN_METHOD(Htonl);
-NAN_METHOD(Htons);
-NAN_METHOD(Ntohl);
-NAN_METHOD(Ntohs);
+Napi::Value Htonl(const Napi::CallbackInfo& info);
+Napi::Value Htons(const Napi::CallbackInfo& info);
+Napi::Value Ntohl(const Napi::CallbackInfo& info);
+Napi::Value Ntohs(const Napi::CallbackInfo& info);
 
-class SocketWrap : public Nan::ObjectWrap {
+class SocketWrap : public Napi::ObjectWrap<SocketWrap> {
 public:
+	SocketWrap(const Napi::CallbackInfo& info);
+	virtual ~SocketWrap ();
+
 	void HandleIOEvent (int status, int revents);
-	static void Init (Local<Object> exports);
+	static void Init (Napi::Env env, Napi::Object exports);
+
 
 private:
-	SocketWrap ();
-	~SocketWrap ();
-
-	static NAN_METHOD(Close);
+	Napi::Value Close(const Napi::CallbackInfo& info);
 
 	void CloseSocket (void);
 	
 	int CreateSocket (void);
 
-	static NAN_METHOD(GetOption);
-
-	static NAN_METHOD(New);
+	Napi::Value GetOption(const Napi::CallbackInfo& info);
 
 	static void OnClose (uv_handle_t *handle);
 
-	static NAN_METHOD(Pause);
-	static NAN_METHOD(Recv);
-	static NAN_METHOD(Send);
-	static NAN_METHOD(SetOption);
+	Napi::Value Pause(const Napi::CallbackInfo& info);
+	Napi::Value Recv(const Napi::CallbackInfo& info);
+	Napi::Value Send(const Napi::CallbackInfo& info);
+	Napi::Value SetOption(const Napi::CallbackInfo& info);
+
+	Napi::Value handle();
 
 	bool no_ip_header_;
 
