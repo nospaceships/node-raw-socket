@@ -123,8 +123,7 @@ Napi::Value CreateChecksum(const Napi::CallbackInfo& info) {
 	uint16_t sum = checksum ((uint16_t) start_with,
 			(unsigned char *) data + offset, length);
 
-	Local<Integer> number = Napi::Uint32::New(env, sum);
-	
+	Napi::Number number = Napi::Number::New(env, sum);
 	return number;
 }
 
@@ -145,7 +144,7 @@ Napi::Value Htonl(const Napi::CallbackInfo& info) {
 	}
 
 	unsigned int number = info[0].As<Napi::Number>();
-	Local<Uint32> converted = Napi::Uint32::New(env, (unsigned int) htonl (number));
+	Napi::Number converted = Napi::Number::New(env, (unsigned int) htonl (number));
 
 	return converted;
 }
@@ -174,7 +173,7 @@ Napi::Value Htons(const Napi::CallbackInfo& info) {
 		return;
 	}
 	
-	Local<Uint32> converted = Napi::Uint32::New(env, htons (number));
+	Napi::Number converted = Napi::Number::New(env, htons (number));
 
 	return converted;
 }
@@ -196,7 +195,7 @@ Napi::Value Ntohl(const Napi::CallbackInfo& info) {
 	}
 
 	unsigned int number = info[0].As<Napi::Number>();
-	Local<Uint32> converted = Napi::Uint32::New(env, (unsigned int) ntohl (number));
+	Napi::Number converted = Napi::Number::New(env, (unsigned int) ntohl (number));
 
 	return converted;
 }
@@ -225,7 +224,7 @@ Napi::Value Ntohs(const Napi::CallbackInfo& info) {
 		return;
 	}
 	
-	Local<Uint32> converted = Napi::Uint32::New(env, htons (number));
+	Napi::Number converted = Napi::Number::New(env, ntohs (number));
 
 	return converted;
 }
