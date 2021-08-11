@@ -66,13 +66,13 @@ Napi::Value CreateChecksum(const Napi::CallbackInfo& info) {
 		return;
 	}
 
-	if (! info[0].IsUint32 ()) {
+	if (! info[0].IsNumber ()) {
 		Napi::TypeError::New(env, "Start with argument must be an unsigned integer").ThrowAsJavaScriptException();
 
 		return;
 	}
 	
-	uint32_t start_with = Napi::To<Uint32>(info[0])->Value();
+	uint32_t start_with = info[0].As<Napi::Number>();
 
 	if (start_with > 65535) {
 		Napi::RangeError::New(env, "Start with argument cannot be larger than 65535").ThrowAsJavaScriptException();
@@ -86,18 +86,18 @@ Napi::Value CreateChecksum(const Napi::CallbackInfo& info) {
 		return;
 	}
 	
-	Napi::Object buffer = info[1].To<Napi::Object>();
+	Napi::Object buffer = info[1].As<Napi::Object>();
 	char *data = node::Buffer::Data (buffer);
 	size_t length = node::Buffer::Length (buffer);
 	unsigned int offset = 0;
 	
 	if (info.Length () > 2) {
-		if (! info[2].IsUint32 ()) {
+		if (! info[2].IsNumber ()) {
 			Napi::TypeError::New(env, "Offset argument must be an unsigned integer").ThrowAsJavaScriptException();
 
 			return;
 		}
-		offset = Napi::To<Uint32>(info[2])->Value();
+		offset = info[2].As<Napi::Number>();
 		if (offset >= length) {
 			Napi::RangeError::New(env, "Offset argument must be smaller than length of the buffer").ThrowAsJavaScriptException();
 
@@ -106,12 +106,12 @@ Napi::Value CreateChecksum(const Napi::CallbackInfo& info) {
 	}
 	
 	if (info.Length () > 3) {
-		if (! info[3].IsUint32 ()) {
+		if (! info[3].IsNumber ()) {
 			Napi::TypeError::New(env, "Length argument must be an unsigned integer").ThrowAsJavaScriptException();
 
 			return;
 		}
-		unsigned int new_length = Napi::To<Uint32>(info[3])->Value();
+		unsigned int new_length = info[3].As<Napi::Number>();
 		if (new_length > length) {
 			Napi::RangeError::New(env, "Length argument must be smaller than length of the buffer").ThrowAsJavaScriptException();
 
@@ -138,13 +138,13 @@ Napi::Value Htonl(const Napi::CallbackInfo& info) {
 		return;
 	}
 
-	if (! info[0].IsUint32 ()) {
+	if (! info[0].IsNumber ()) {
 		Napi::TypeError::New(env, "Number must be a 32 unsigned integer").ThrowAsJavaScriptException();
 
 		return;
 	}
 
-	unsigned int number = Napi::To<Uint32>(info[0])->Value();
+	unsigned int number = info[0].As<Napi::Number>();
 	Local<Uint32> converted = Napi::Uint32::New(env, (unsigned int) htonl (number));
 
 	return converted;
@@ -160,13 +160,13 @@ Napi::Value Htons(const Napi::CallbackInfo& info) {
 		return;
 	}
 
-	if (! info[0].IsUint32 ()) {
+	if (! info[0].IsNumber ()) {
 		Napi::TypeError::New(env, "Number must be a 16 unsigned integer").ThrowAsJavaScriptException();
 
 		return;
 	}
 	
-	unsigned int number = Napi::To<Uint32>(info[0])->Value();
+	unsigned int number = info[0].As<Napi::Number>();
 	
 	if (number > 65535) {
 		Napi::RangeError::New(env, "Number cannot be larger than 65535").ThrowAsJavaScriptException();
@@ -189,13 +189,13 @@ Napi::Value Ntohl(const Napi::CallbackInfo& info) {
 		return;
 	}
 
-	if (! info[0].IsUint32 ()) {
+	if (! info[0].IsNumber ()) {
 		Napi::TypeError::New(env, "Number must be a 32 unsigned integer").ThrowAsJavaScriptException();
 
 		return;
 	}
 
-	unsigned int number = Napi::To<Uint32>(info[0])->Value();
+	unsigned int number = info[0].As<Napi::Number>();
 	Local<Uint32> converted = Napi::Uint32::New(env, (unsigned int) ntohl (number));
 
 	return converted;
@@ -211,13 +211,13 @@ Napi::Value Ntohs(const Napi::CallbackInfo& info) {
 		return;
 	}
 
-	if (! info[0].IsUint32 ()) {
+	if (! info[0].IsNumber ()) {
 		Napi::TypeError::New(env, "Number must be a 16 unsigned integer").ThrowAsJavaScriptException();
 
 		return;
 	}
 	
-	unsigned int number = Napi::To<Uint32>(info[0])->Value();
+	unsigned int number = info[0].As<Napi::Number>();
 	
 	if (number > 65535) {
 		Napi::RangeError::New(env, "Number cannot be larger than 65535").ThrowAsJavaScriptException();
@@ -265,19 +265,19 @@ void ExportConstants (Napi::Env env, Napi::Object target) {
 }
 
 void ExportFunctions (Napi::Env env, Napi::Object target) {
-	(target).Set(Napi::String::New(env, "createChecksum"), Napi::GetFunction(Napi::Function::New(env, CreateChecksum)));
+	(target).Set(Napi::String::New(env, "createChecksum"), Napi::Function::New(env, CreateChecksum));
 	
-	(target).Set(Napi::String::New(env, "htonl"), Napi::GetFunction(Napi::Function::New(env, Htonl)));
-	(target).Set(Napi::String::New(env, "htons"), Napi::GetFunction(Napi::Function::New(env, Htons)));
-	(target).Set(Napi::String::New(env, "ntohl"), Napi::GetFunction(Napi::Function::New(env, Ntohl)));
-	(target).Set(Napi::String::New(env, "ntohs"), Napi::GetFunction(Napi::Function::New(env, Ntohs)));
+	(target).Set(Napi::String::New(env, "htonl"), Napi::Function::New(env, Htonl));
+	(target).Set(Napi::String::New(env, "htons"), Napi::Function::New(env, Htons));
+	(target).Set(Napi::String::New(env, "ntohl"), Napi::Function::New(env, Ntohl));
+	(target).Set(Napi::String::New(env, "ntohs"), Napi::Function::New(env, Ntohs));
 }
 
 void SocketWrap::Init (Napi::Env env, Napi::Object exports) {
 	Napi::HandleScope scope(env);
 
-	Napi::FunctionReference tpl = Napi::Function::New(env, SocketWrap::New);
-	tpl->SetClassName(Napi::String::New(env, "SocketWrap"));
+	Napi::FunctionReference tpl = Napi::Persistent(Napi::Function::New(env, SocketWrap::New));
+	tpl.Value().SetClassName(Napi::String::New(env, "SocketWrap"));
 
 
 	InstanceMethod("close", &Close),
@@ -396,8 +396,8 @@ Napi::Value SocketWrap::GetOption(const Napi::CallbackInfo& info) {
 		return;
 	}
 
-	int level = Napi::To<Uint32>(info[0])->Value();
-	int option = Napi::To<Uint32>(info[1])->Value();
+	int level = info[0].As<Napi::Number>();
+	int option = info[1].As<Napi::Number>();
 	SOCKET_OPT_TYPE val = NULL;
 	unsigned int ival = 0;
 	SOCKET_LEN_TYPE len;
@@ -408,10 +408,10 @@ Napi::Value SocketWrap::GetOption(const Napi::CallbackInfo& info) {
 		return;
 	}
 	
-	Napi::Object buffer = info[2].To<Napi::Object>();
+	Napi::Object buffer = info[2].As<Napi::Object>();
 	val = node::Buffer::Data (buffer);
 
-	if (! info[3].IsInt32 ()) {
+	if (! info[3].IsNumber ()) {
 		Napi::TypeError::New(env, "Length argument must be an unsigned integer").ThrowAsJavaScriptException();
 
 		return;
@@ -428,7 +428,7 @@ Napi::Value SocketWrap::GetOption(const Napi::CallbackInfo& info) {
 		return;
 	}
 	
-	Napi::Number got = Napi::Uint32::New(env, len);
+	Napi::Number got = Napi::Number::New(env, len);
 	
 	return got;
 }
@@ -475,21 +475,21 @@ Napi::Value SocketWrap::New(const Napi::CallbackInfo& info) {
 		return;
 	}
 	
-	if (! info[0].IsUint32 ()) {
+	if (! info[0].IsNumber ()) {
 		Napi::TypeError::New(env, "Protocol argument must be an unsigned integer").ThrowAsJavaScriptException();
 
 		return;
 	} else {
-		socket->protocol_ = Napi::To<Uint32>(info[0])->Value();
+		socket->protocol_ = info[0].As<Napi::Number>();
 	}
 
 	if (info.Length () > 1) {
-		if (! info[1].IsUint32 ()) {
+		if (! info[1].IsNumber ()) {
 			Napi::TypeError::New(env, "Address family argument must be an unsigned integer").ThrowAsJavaScriptException();
 
 			return;
 		} else {
-			if (Napi::To<Uint32>(info[1])->Value() == 2)
+			if (uint32_t(info[1].As<Napi::Number>()) == 2)
 				family = AF_INET6;
 		}
 	}
@@ -533,14 +533,14 @@ Napi::Value SocketWrap::Pause(const Napi::CallbackInfo& info) {
 
 		return;
 	}
-	bool pause_recv = info[0].To<Napi::Boolean>()->Value();
+	bool pause_recv = info[0].As<Napi::Boolean>();
 
 	if (! info[1].IsBoolean ()) {
 		Napi::TypeError::New(env, "Send argument must be a boolean").ThrowAsJavaScriptException();
 
 		return;
 	}
-	bool pause_send = info[1].To<Napi::Boolean>()->Value();
+	bool pause_send = info[1].As<Napi::Boolean>();
 	
 	int events = (pause_recv ? 0 : UV_READABLE)
 			| (pause_send ? 0 : UV_WRITABLE);
@@ -585,7 +585,7 @@ Napi::Value SocketWrap::Recv(const Napi::CallbackInfo& info) {
 
 		return;
 	} else {
-		buffer = info[0].To<Napi::Object>();
+		buffer = info[0].As<Napi::Object>();
 	}
 
 	if (! info[1].IsFunction ()) {
@@ -639,7 +639,7 @@ Napi::Value SocketWrap::Send(const Napi::CallbackInfo& info) {
 	Napi::Env env = info.Env();
 	Napi::HandleScope scope(env);
 	
-	SocketWrap* socket = SocketWrap::Unwrap<SocketWrap> (info.This ());
+	SocketWrap* socket = this;
 	Napi::Object buffer;
 	uint32_t offset;
 	uint32_t length;
@@ -658,13 +658,13 @@ Napi::Value SocketWrap::Send(const Napi::CallbackInfo& info) {
 		return;
 	}
 	
-	if (! info[1].IsUint32 ()) {
+	if (! info[1].IsNumber ()) {
 		Napi::TypeError::New(env, "Offset argument must be an unsigned integer").ThrowAsJavaScriptException();
 
 		return;
 	}
 
-	if (! info[2].IsUint32 ()) {
+	if (! info[2].IsNumber ()) {
 		Napi::TypeError::New(env, "Length argument must be an unsigned integer").ThrowAsJavaScriptException();
 
 		return;
@@ -689,9 +689,9 @@ Napi::Value SocketWrap::Send(const Napi::CallbackInfo& info) {
 		return;
 	}
 	
-	buffer = info[0].To<Napi::Object>();
-	offset = Napi::To<Uint32>(info[1])->Value();
-	length = Napi::To<Uint32>(info[2])->Value();
+	buffer = info[0].As<Napi::Object>();
+	offset = info[1].As<Napi::Number>();
+	length = info[2].As<Napi::Number>();
 
 	data = node::Buffer::Data (buffer) + offset;
 	
@@ -759,8 +759,8 @@ Napi::Value SocketWrap::SetOption(const Napi::CallbackInfo& info) {
 		return;
 	}
 
-	int level = Napi::To<Uint32>(info[0])->Value();
-	int option = Napi::To<Uint32>(info[1])->Value();
+	int level = info[0].As<Napi::Number>();
+	int option = info[1].As<Napi::Number>();
 	SOCKET_OPT_TYPE val = NULL;
 	unsigned int ival = 0;
 	SOCKET_LEN_TYPE len;
@@ -772,16 +772,16 @@ Napi::Value SocketWrap::SetOption(const Napi::CallbackInfo& info) {
 			return;
 		}
 		
-		Napi::Object buffer = info[2].To<Napi::Object>();
+		Napi::Object buffer = info[2].As<Napi::Object>();
 		val = node::Buffer::Data (buffer);
 
-		if (! info[3].IsInt32 ()) {
+		if (! info[3].IsNumber ()) {
 			Napi::TypeError::New(env, "Length argument must be an unsigned integer").ThrowAsJavaScriptException();
 
 			return;
 		}
 
-		len = Napi::To<Uint32>(info[3])->Value();
+		len = info[3].As<Napi::Number>();
 
 		if (len > node::Buffer::Length (buffer)) {
 			Napi::TypeError::New(env, "Length argument is larger than buffer length").ThrowAsJavaScriptException();
@@ -789,13 +789,13 @@ Napi::Value SocketWrap::SetOption(const Napi::CallbackInfo& info) {
 			return;
 		}
 	} else {
-		if (! info[2].IsUint32 ()) {
+		if (! info[2].IsNumber ()) {
 			Napi::TypeError::New(env, "Value argument must be a unsigned integer").ThrowAsJavaScriptException();
 
 			return;
 		}
 
-		ival = Napi::To<Uint32>(info[2])->Value();
+		ival = info[2].As<Napi::Number>();
 		len = 4;
 	}
 
