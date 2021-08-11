@@ -279,12 +279,12 @@ void SocketWrap::Init (Napi::Env env, Napi::Object exports) {
 	tpl.Value().SetClassName(Napi::String::New(env, "SocketWrap"));
 
 
-	InstanceMethod("close", &Close),
-	InstanceMethod("getOption", &GetOption),
-	InstanceMethod("pause", &Pause),
-	InstanceMethod("recv", &Recv),
-	InstanceMethod("send", &Send),
-	InstanceMethod("setOption", &SetOption),
+	InstanceMethod("close", &Close);
+	InstanceMethod("getOption", &GetOption);
+	InstanceMethod("pause", &Pause);
+	InstanceMethod("recv", &Recv);
+	InstanceMethod("send", &Send);
+	InstanceMethod("setOption", &SetOption);
 
 	SocketWrap_constructor.Reset(tpl);
 	(exports).Set(Napi::String::New(env, "SocketWrap"), tpl);
