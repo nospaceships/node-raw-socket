@@ -43,67 +43,75 @@ static uint16_t checksum (uint16_t start_with, unsigned char *buffer,
 
 namespace raw {
 
-static Nan::Persistent<FunctionTemplate> SocketWrap_constructor;
+static Napi::FunctionReference SocketWrap_constructor;
 
-void InitAll (Local<Object> exports) {
+void InitAll (Napi::Object exports) {
 	ExportConstants (exports);
 	ExportFunctions (exports);
 
 	SocketWrap::Init (exports);
 }
 
-NODE_MODULE(raw, InitAll)
+NODE_API_MODULE(raw, InitAll)
 
-NAN_METHOD(CreateChecksum) {
-	Nan::HandleScope scope;
+Napi::Value CreateChecksum(const Napi::CallbackInfo& info) {
+	Napi::HandleScope scope(env);
 	
 	if (info.Length () < 2) {
-		Nan::ThrowError("At least one argument is required");
+		Napi::Error::New(env, "At least one argument is required").ThrowAsJavaScriptException();
+
 		return;
 	}
 
-	if (! info[0]->IsUint32 ()) {
-		Nan::ThrowTypeError("Start with argument must be an unsigned integer");
+	if (! info[0].IsUint32 ()) {
+		Napi::TypeError::New(env, "Start with argument must be an unsigned integer").ThrowAsJavaScriptException();
+
 		return;
 	}
 	
-	uint32_t start_with = Nan::To<Uint32>(info[0]).ToLocalChecked()->Value();
+	uint32_t start_with = Napi::To<Uint32>(info[0])->Value();
 
 	if (start_with > 65535) {
-		Nan::ThrowRangeError("Start with argument cannot be larger than 65535");
+		Napi::RangeError::New(env, "Start with argument cannot be larger than 65535").ThrowAsJavaScriptException();
+
 		return;
 	}
 
 	if (! node::Buffer::HasInstance (info[1])) {
-		Nan::ThrowTypeError("Buffer argument must be a node Buffer object");
+		Napi::TypeError::New(env, "Buffer argument must be a node Buffer object").ThrowAsJavaScriptException();
+
 		return;
 	}
 	
-	Local<Object> buffer = Nan::To<Object>(info[1]).ToLocalChecked();
+	Napi::Object buffer = info[1].To<Napi::Object>();
 	char *data = node::Buffer::Data (buffer);
 	size_t length = node::Buffer::Length (buffer);
 	unsigned int offset = 0;
 	
 	if (info.Length () > 2) {
-		if (! info[2]->IsUint32 ()) {
-			Nan::ThrowTypeError("Offset argument must be an unsigned integer");
+		if (! info[2].IsUint32 ()) {
+			Napi::TypeError::New(env, "Offset argument must be an unsigned integer").ThrowAsJavaScriptException();
+
 			return;
 		}
-		offset = Nan::To<Uint32>(info[2]).ToLocalChecked()->Value();
+		offset = Napi::To<Uint32>(info[2])->Value();
 		if (offset >= length) {
-			Nan::ThrowRangeError("Offset argument must be smaller than length of the buffer");
+			Napi::RangeError::New(env, "Offset argument must be smaller than length of the buffer").ThrowAsJavaScriptException();
+
 			return;
 		}
 	}
 	
 	if (info.Length () > 3) {
-		if (! info[3]->IsUint32 ()) {
-			Nan::ThrowTypeError("Length argument must be an unsigned integer");
+		if (! info[3].IsUint32 ()) {
+			Napi::TypeError::New(env, "Length argument must be an unsigned integer").ThrowAsJavaScriptException();
+
 			return;
 		}
-		unsigned int new_length = Nan::To<Uint32>(info[3]).ToLocalChecked()->Value();
+		unsigned int new_length = Napi::To<Uint32>(info[3])->Value();
 		if (new_length > length) {
-			Nan::ThrowRangeError("Length argument must be smaller than length of the buffer");
+			Napi::RangeError::New(env, "Length argument must be smaller than length of the buffer").ThrowAsJavaScriptException();
+
 			return;
 		}
 		length = new_length;
@@ -112,158 +120,168 @@ NAN_METHOD(CreateChecksum) {
 	uint16_t sum = checksum ((uint16_t) start_with,
 			(unsigned char *) data + offset, length);
 
-	Local<Integer> number = Nan::New<Uint32>(sum);
+	Local<Integer> number = Napi::Uint32::New(env, sum);
 	
-	info.GetReturnValue().Set(number);
+	return number;
 }
 
-NAN_METHOD(Htonl) {
-	Nan::HandleScope scope;
+Napi::Value Htonl(const Napi::CallbackInfo& info) {
+	Napi::HandleScope scope(env);
 
 	if (info.Length () < 1) {
-		Nan::ThrowError("One arguments is required");
+		Napi::Error::New(env, "One arguments is required").ThrowAsJavaScriptException();
+
 		return;
 	}
 
-	if (! info[0]->IsUint32 ()) {
-		Nan::ThrowTypeError("Number must be a 32 unsigned integer");
+	if (! info[0].IsUint32 ()) {
+		Napi::TypeError::New(env, "Number must be a 32 unsigned integer").ThrowAsJavaScriptException();
+
 		return;
 	}
 
-	unsigned int number = Nan::To<Uint32>(info[0]).ToLocalChecked()->Value();
-	Local<Uint32> converted = Nan::New<Uint32>((unsigned int) htonl (number));
+	unsigned int number = Napi::To<Uint32>(info[0])->Value();
+	Local<Uint32> converted = Napi::Uint32::New(env, (unsigned int) htonl (number));
 
-	info.GetReturnValue().Set(converted);
+	return converted;
 }
 
-NAN_METHOD(Htons) {
-	Nan::HandleScope scope;
+Napi::Value Htons(const Napi::CallbackInfo& info) {
+	Napi::HandleScope scope(env);
 	
 	if (info.Length () < 1) {
-		Nan::ThrowError("One arguments is required");
+		Napi::Error::New(env, "One arguments is required").ThrowAsJavaScriptException();
+
 		return;
 	}
 
-	if (! info[0]->IsUint32 ()) {
-		Nan::ThrowTypeError("Number must be a 16 unsigned integer");
+	if (! info[0].IsUint32 ()) {
+		Napi::TypeError::New(env, "Number must be a 16 unsigned integer").ThrowAsJavaScriptException();
+
 		return;
 	}
 	
-	unsigned int number = Nan::To<Uint32>(info[0]).ToLocalChecked()->Value();
+	unsigned int number = Napi::To<Uint32>(info[0])->Value();
 	
 	if (number > 65535) {
-		Nan::ThrowRangeError("Number cannot be larger than 65535");
+		Napi::RangeError::New(env, "Number cannot be larger than 65535").ThrowAsJavaScriptException();
+
 		return;
 	}
 	
-	Local<Uint32> converted = Nan::New<Uint32>(htons (number));
+	Local<Uint32> converted = Napi::Uint32::New(env, htons (number));
 
-	info.GetReturnValue().Set(converted);
+	return converted;
 }
 
-NAN_METHOD(Ntohl) {
-	Nan::HandleScope scope;
+Napi::Value Ntohl(const Napi::CallbackInfo& info) {
+	Napi::HandleScope scope(env);
 	
 	if (info.Length () < 1) {
-		Nan::ThrowError("One arguments is required");
+		Napi::Error::New(env, "One arguments is required").ThrowAsJavaScriptException();
+
 		return;
 	}
 
-	if (! info[0]->IsUint32 ()) {
-		Nan::ThrowTypeError("Number must be a 32 unsigned integer");
+	if (! info[0].IsUint32 ()) {
+		Napi::TypeError::New(env, "Number must be a 32 unsigned integer").ThrowAsJavaScriptException();
+
 		return;
 	}
 
-	unsigned int number = Nan::To<Uint32>(info[0]).ToLocalChecked()->Value();
-	Local<Uint32> converted = Nan::New<Uint32>((unsigned int) ntohl (number));
+	unsigned int number = Napi::To<Uint32>(info[0])->Value();
+	Local<Uint32> converted = Napi::Uint32::New(env, (unsigned int) ntohl (number));
 
-	info.GetReturnValue().Set(converted);
+	return converted;
 }
 
-NAN_METHOD(Ntohs) {
-	Nan::HandleScope scope;
+Napi::Value Ntohs(const Napi::CallbackInfo& info) {
+	Napi::HandleScope scope(env);
 	
 	if (info.Length () < 1) {
-		Nan::ThrowError("One arguments is required");
+		Napi::Error::New(env, "One arguments is required").ThrowAsJavaScriptException();
+
 		return;
 	}
 
-	if (! info[0]->IsUint32 ()) {
-		Nan::ThrowTypeError("Number must be a 16 unsigned integer");
+	if (! info[0].IsUint32 ()) {
+		Napi::TypeError::New(env, "Number must be a 16 unsigned integer").ThrowAsJavaScriptException();
+
 		return;
 	}
 	
-	unsigned int number = Nan::To<Uint32>(info[0]).ToLocalChecked()->Value();
+	unsigned int number = Napi::To<Uint32>(info[0])->Value();
 	
 	if (number > 65535) {
-		Nan::ThrowRangeError("Number cannot be larger than 65535");
+		Napi::RangeError::New(env, "Number cannot be larger than 65535").ThrowAsJavaScriptException();
+
 		return;
 	}
 	
-	Local<Uint32> converted = Nan::New<Uint32>(htons (number));
+	Local<Uint32> converted = Napi::Uint32::New(env, htons (number));
 
-	info.GetReturnValue().Set(converted);
+	return converted;
 }
 
-void ExportConstants (Local<Object> target) {
-	Local<Object> socket_level = Nan::New<Object>();
-	Local<Object> socket_option = Nan::New<Object>();
+void ExportConstants (Napi::Object target) {
+	Napi::Object socket_level = Napi::Object::New(env);
+	Napi::Object socket_option = Napi::Object::New(env);
 
-	Nan::Set(target, Nan::New("SocketLevel").ToLocalChecked(), socket_level);
-	Nan::Set(target, Nan::New("SocketOption").ToLocalChecked(), socket_option);
+	(target).Set(Napi::String::New(env, "SocketLevel"), socket_level);
+	(target).Set(Napi::String::New(env, "SocketOption"), socket_option);
 
-	Nan::Set(socket_level, Nan::New("SOL_SOCKET").ToLocalChecked(), Nan::New<Number>(SOL_SOCKET));
-	Nan::Set(socket_level, Nan::New("IPPROTO_IP").ToLocalChecked(), Nan::New<Number>(IPPROTO_IP + 0));
-	Nan::Set(socket_level, Nan::New("IPPROTO_IPV6").ToLocalChecked(), Nan::New<Number>(IPPROTO_IPV6 + 0));
+	(socket_level).Set(Napi::String::New(env, "SOL_SOCKET"), Napi::Number::New(env, SOL_SOCKET));
+	(socket_level).Set(Napi::String::New(env, "IPPROTO_IP"), Napi::Number::New(env, IPPROTO_IP + 0));
+	(socket_level).Set(Napi::String::New(env, "IPPROTO_IPV6"), Napi::Number::New(env, IPPROTO_IPV6 + 0));
 
-	Nan::Set(socket_option, Nan::New("SO_BROADCAST").ToLocalChecked(), Nan::New<Number>(SO_BROADCAST));
-	Nan::Set(socket_option, Nan::New("SO_RCVBUF").ToLocalChecked(), Nan::New<Number>(SO_RCVBUF));
-	Nan::Set(socket_option, Nan::New("SO_RCVTIMEO").ToLocalChecked(), Nan::New<Number>(SO_RCVTIMEO));
-	Nan::Set(socket_option, Nan::New("SO_SNDBUF").ToLocalChecked(), Nan::New<Number>(SO_SNDBUF));
-	Nan::Set(socket_option, Nan::New("SO_SNDTIMEO").ToLocalChecked(), Nan::New<Number>(SO_SNDTIMEO));
+	(socket_option).Set(Napi::String::New(env, "SO_BROADCAST"), Napi::Number::New(env, SO_BROADCAST));
+	(socket_option).Set(Napi::String::New(env, "SO_RCVBUF"), Napi::Number::New(env, SO_RCVBUF));
+	(socket_option).Set(Napi::String::New(env, "SO_RCVTIMEO"), Napi::Number::New(env, SO_RCVTIMEO));
+	(socket_option).Set(Napi::String::New(env, "SO_SNDBUF"), Napi::Number::New(env, SO_SNDBUF));
+	(socket_option).Set(Napi::String::New(env, "SO_SNDTIMEO"), Napi::Number::New(env, SO_SNDTIMEO));
 
 #ifdef __linux__
-	Nan::Set(socket_option, Nan::New("SO_BINDTODEVICE").ToLocalChecked(), Nan::New<Number>(SO_BINDTODEVICE));
+	(socket_option).Set(Napi::String::New(env, "SO_BINDTODEVICE"), Napi::Number::New(env, SO_BINDTODEVICE));
 #endif
 
-	Nan::Set(socket_option, Nan::New("IP_HDRINCL").ToLocalChecked(), Nan::New<Number>(IP_HDRINCL));
-	Nan::Set(socket_option, Nan::New("IP_OPTIONS").ToLocalChecked(), Nan::New<Number>(IP_OPTIONS));
-	Nan::Set(socket_option, Nan::New("IP_TOS").ToLocalChecked(), Nan::New<Number>(IP_TOS));
-	Nan::Set(socket_option, Nan::New("IP_TTL").ToLocalChecked(), Nan::New<Number>(IP_TTL));
+	(socket_option).Set(Napi::String::New(env, "IP_HDRINCL"), Napi::Number::New(env, IP_HDRINCL));
+	(socket_option).Set(Napi::String::New(env, "IP_OPTIONS"), Napi::Number::New(env, IP_OPTIONS));
+	(socket_option).Set(Napi::String::New(env, "IP_TOS"), Napi::Number::New(env, IP_TOS));
+	(socket_option).Set(Napi::String::New(env, "IP_TTL"), Napi::Number::New(env, IP_TTL));
 
 #ifdef _WIN32
-	Nan::Set(socket_option, Nan::New("IPV6_HDRINCL").ToLocalChecked(), Nan::New<Number>(IPV6_HDRINCL));
+	(socket_option).Set(Napi::String::New(env, "IPV6_HDRINCL"), Napi::Number::New(env, IPV6_HDRINCL));
 #endif
-	Nan::Set(socket_option, Nan::New("IPV6_TTL").ToLocalChecked(), Nan::New<Number>(IPV6_UNICAST_HOPS));
-	Nan::Set(socket_option, Nan::New("IPV6_UNICAST_HOPS").ToLocalChecked(), Nan::New<Number>(IPV6_UNICAST_HOPS));
-	Nan::Set(socket_option, Nan::New("IPV6_V6ONLY").ToLocalChecked(), Nan::New<Number>(IPV6_V6ONLY));
+	(socket_option).Set(Napi::String::New(env, "IPV6_TTL"), Napi::Number::New(env, IPV6_UNICAST_HOPS));
+	(socket_option).Set(Napi::String::New(env, "IPV6_UNICAST_HOPS"), Napi::Number::New(env, IPV6_UNICAST_HOPS));
+	(socket_option).Set(Napi::String::New(env, "IPV6_V6ONLY"), Napi::Number::New(env, IPV6_V6ONLY));
 }
 
-void ExportFunctions (Local<Object> target) {
-	Nan::Set(target, Nan::New("createChecksum").ToLocalChecked(), Nan::GetFunction(Nan::New<FunctionTemplate>(CreateChecksum)).ToLocalChecked());
+void ExportFunctions (Napi::Object target) {
+	(target).Set(Napi::String::New(env, "createChecksum"), Napi::GetFunction(Napi::Function::New(env, CreateChecksum)));
 	
-	Nan::Set(target, Nan::New("htonl").ToLocalChecked(), Nan::GetFunction(Nan::New<FunctionTemplate>(Htonl)).ToLocalChecked());
-	Nan::Set(target, Nan::New("htons").ToLocalChecked(), Nan::GetFunction(Nan::New<FunctionTemplate>(Htons)).ToLocalChecked());
-	Nan::Set(target, Nan::New("ntohl").ToLocalChecked(), Nan::GetFunction(Nan::New<FunctionTemplate>(Ntohl)).ToLocalChecked());
-	Nan::Set(target, Nan::New("ntohs").ToLocalChecked(), Nan::GetFunction(Nan::New<FunctionTemplate>(Ntohs)).ToLocalChecked());
+	(target).Set(Napi::String::New(env, "htonl"), Napi::GetFunction(Napi::Function::New(env, Htonl)));
+	(target).Set(Napi::String::New(env, "htons"), Napi::GetFunction(Napi::Function::New(env, Htons)));
+	(target).Set(Napi::String::New(env, "ntohl"), Napi::GetFunction(Napi::Function::New(env, Ntohl)));
+	(target).Set(Napi::String::New(env, "ntohs"), Napi::GetFunction(Napi::Function::New(env, Ntohs)));
 }
 
-void SocketWrap::Init (Local<Object> exports) {
-	Nan::HandleScope scope;
+void SocketWrap::Init (Napi::Object exports) {
+	Napi::HandleScope scope(env);
 
-	Local<FunctionTemplate> tpl = Nan::New<FunctionTemplate>(SocketWrap::New);
-	tpl->SetClassName(Nan::New("SocketWrap").ToLocalChecked());
-	tpl->InstanceTemplate()->SetInternalFieldCount(1);
+	Napi::FunctionReference tpl = Napi::Function::New(env, SocketWrap::New);
+	tpl->SetClassName(Napi::String::New(env, "SocketWrap"));
 
-	Nan::SetPrototypeMethod(tpl, "close", Close);
-	Nan::SetPrototypeMethod(tpl, "getOption", GetOption);
-	Nan::SetPrototypeMethod(tpl, "pause", Pause);
-	Nan::SetPrototypeMethod(tpl, "recv", Recv);
-	Nan::SetPrototypeMethod(tpl, "send", Send);
-	Nan::SetPrototypeMethod(tpl, "setOption", SetOption);
+
+	InstanceMethod("close", &Close),
+	InstanceMethod("getOption", &GetOption),
+	InstanceMethod("pause", &Pause),
+	InstanceMethod("recv", &Recv),
+	InstanceMethod("send", &Send),
+	InstanceMethod("setOption", &SetOption),
 
 	SocketWrap_constructor.Reset(tpl);
-	Nan::Set(exports, Nan::New("SocketWrap").ToLocalChecked(), Nan::GetFunction(tpl).ToLocalChecked());
+	(exports).Set(Napi::String::New(env, "SocketWrap"), Napi::GetFunction(tpl));
 }
 
 SocketWrap::SocketWrap () {
@@ -275,19 +293,19 @@ SocketWrap::~SocketWrap () {
 	this->CloseSocket ();
 }
 
-NAN_METHOD(SocketWrap::Close) {
-	Nan::HandleScope scope;
+Napi::Value SocketWrap::Close(const Napi::CallbackInfo& info) {
+	Napi::HandleScope scope(env);
 	
 	SocketWrap* socket = SocketWrap::Unwrap<SocketWrap> (info.This ());
 	
 	socket->CloseSocket ();
 
-	Local<Value> args[1];
-	args[0] = Nan::New<String>("close").ToLocalChecked();
+	Napi::Value args[1];
+	args[0] = Napi::String::New(env, "close");
 
-	Nan::Call(Nan::New<String>("emit").ToLocalChecked(), info.This(), 1, args);
+	Napi::Call(Napi::String::New(env, "emit"), info.This(), 1, args);
 
-	info.GetReturnValue().Set(info.This());
+	return info.This();
 }
 
 void SocketWrap::CloseSocket (void) {
@@ -346,42 +364,47 @@ int SocketWrap::CreateSocket (void) {
 	return 0;
 }
 
-NAN_METHOD(SocketWrap::GetOption) {
-	Nan::HandleScope scope;
+Napi::Value SocketWrap::GetOption(const Napi::CallbackInfo& info) {
+	Napi::HandleScope scope(env);
 	
 	SocketWrap* socket = SocketWrap::Unwrap<SocketWrap> (info.This ());
 	
 	if (info.Length () < 3) {
-		Nan::ThrowError("Three arguments are required");
+		Napi::Error::New(env, "Three arguments are required").ThrowAsJavaScriptException();
+
 		return;
 	}
 
-	if (! info[0]->IsNumber ()) {
-		Nan::ThrowTypeError("Level argument must be a number");
+	if (! info[0].IsNumber ()) {
+		Napi::TypeError::New(env, "Level argument must be a number").ThrowAsJavaScriptException();
+
 		return;
 	}
 
-	if (! info[1]->IsNumber ()) {
-		Nan::ThrowTypeError("Option argument must be a number");
+	if (! info[1].IsNumber ()) {
+		Napi::TypeError::New(env, "Option argument must be a number").ThrowAsJavaScriptException();
+
 		return;
 	}
 
-	int level = Nan::To<Uint32>(info[0]).ToLocalChecked()->Value();
-	int option = Nan::To<Uint32>(info[1]).ToLocalChecked()->Value();
+	int level = Napi::To<Uint32>(info[0])->Value();
+	int option = Napi::To<Uint32>(info[1])->Value();
 	SOCKET_OPT_TYPE val = NULL;
 	unsigned int ival = 0;
 	SOCKET_LEN_TYPE len;
 
 	if (! node::Buffer::HasInstance (info[2])) {
-		Nan::ThrowTypeError("Value argument must be a node Buffer object if length is provided");
+		Napi::TypeError::New(env, "Value argument must be a node Buffer object if length is provided").ThrowAsJavaScriptException();
+
 		return;
 	}
 	
-	Local<Object> buffer = Nan::To<Object>(info[2]).ToLocalChecked();
+	Napi::Object buffer = info[2].To<Napi::Object>();
 	val = node::Buffer::Data (buffer);
 
-	if (! info[3]->IsInt32 ()) {
-		Nan::ThrowTypeError("Length argument must be an unsigned integer");
+	if (! info[3].IsInt32 ()) {
+		Napi::TypeError::New(env, "Length argument must be an unsigned integer").ThrowAsJavaScriptException();
+
 		return;
 	}
 
@@ -391,21 +414,22 @@ NAN_METHOD(SocketWrap::GetOption) {
 			(val ? val : (SOCKET_OPT_TYPE) &ival), &len);
 
 	if (rc == SOCKET_ERROR) {
-		Nan::ThrowError(raw_strerror (SOCKET_ERRNO));
+		Napi::Error::New(env, raw_strerror (SOCKET_ERRNO)).ThrowAsJavaScriptException();
+
 		return;
 	}
 	
-	Local<Number> got = Nan::New<Uint32>(len);
+	Napi::Number got = Napi::Uint32::New(env, len);
 	
-	info.GetReturnValue().Set(got);
+	return got;
 }
 
 void SocketWrap::HandleIOEvent (int status, int revents) {
-	Nan::HandleScope scope;
+	Napi::HandleScope scope(env);
 
 	if (status) {
-		Local<Value> args[2];
-		args[0] = Nan::New<String>("error").ToLocalChecked();
+		Napi::Value args[2];
+		args[0] = Napi::String::New(env, "error");
 		
 		/**
 		 ** The uv_last_error() function doesn't seem to be available in recent
@@ -415,44 +439,47 @@ void SocketWrap::HandleIOEvent (int status, int revents) {
 		 **/
 		char status_str[32];
 		sprintf(status_str, "%d", status);
-		args[1] = Nan::Error(status_str);
+		args[1] = Napi::Error::New(env, status_str);
 
-		Nan::Call(Nan::New<String>("emit").ToLocalChecked(), handle(), 1, args);
+		Napi::Call(Napi::String::New(env, "emit"), handle(), 1, args);
 	} else {
-		Local<Value> args[1];
+		Napi::Value args[1];
 		if (revents & UV_READABLE)
-			args[0] = Nan::New<String>("recvReady").ToLocalChecked();
+			args[0] = Napi::String::New(env, "recvReady");
 		else
-			args[0] = Nan::New<String>("sendReady").ToLocalChecked();
+			args[0] = Napi::String::New(env, "sendReady");
 
-		Nan::Call(Nan::New<String>("emit").ToLocalChecked(), handle(), 1, args);
+		Napi::Call(Napi::String::New(env, "emit"), handle(), 1, args);
 	}
 }
 
-NAN_METHOD(SocketWrap::New) {
-	Nan::HandleScope scope;
+Napi::Value SocketWrap::New(const Napi::CallbackInfo& info) {
+	Napi::HandleScope scope(env);
 	
 	SocketWrap* socket = new SocketWrap ();
 	int rc, family = AF_INET;
 	
 	if (info.Length () < 1) {
-		Nan::ThrowError("One argument is required");
+		Napi::Error::New(env, "One argument is required").ThrowAsJavaScriptException();
+
 		return;
 	}
 	
-	if (! info[0]->IsUint32 ()) {
-		Nan::ThrowTypeError("Protocol argument must be an unsigned integer");
+	if (! info[0].IsUint32 ()) {
+		Napi::TypeError::New(env, "Protocol argument must be an unsigned integer").ThrowAsJavaScriptException();
+
 		return;
 	} else {
-		socket->protocol_ = Nan::To<Uint32>(info[0]).ToLocalChecked()->Value();
+		socket->protocol_ = Napi::To<Uint32>(info[0])->Value();
 	}
 
 	if (info.Length () > 1) {
-		if (! info[1]->IsUint32 ()) {
-			Nan::ThrowTypeError("Address family argument must be an unsigned integer");
+		if (! info[1].IsUint32 ()) {
+			Napi::TypeError::New(env, "Address family argument must be an unsigned integer").ThrowAsJavaScriptException();
+
 			return;
 		} else {
-			if (Nan::To<Uint32>(info[1]).ToLocalChecked()->Value() == 2)
+			if (Napi::To<Uint32>(info[1])->Value() == 2)
 				family = AF_INET6;
 		}
 	}
@@ -465,40 +492,44 @@ NAN_METHOD(SocketWrap::New) {
 
 	rc = socket->CreateSocket ();
 	if (rc != 0) {
-		Nan::ThrowError(raw_strerror (rc));
+		Napi::Error::New(env, raw_strerror (rc)).ThrowAsJavaScriptException();
+
 		return;
 	}
 
 	socket->Wrap (info.This ());
 
-	info.GetReturnValue().Set(info.This());
+	return info.This();
 }
 
 void SocketWrap::OnClose (uv_handle_t *handle) {
 	delete handle;
 }
 
-NAN_METHOD(SocketWrap::Pause) {
-	Nan::HandleScope scope;
+Napi::Value SocketWrap::Pause(const Napi::CallbackInfo& info) {
+	Napi::HandleScope scope(env);
 	
 	SocketWrap* socket = SocketWrap::Unwrap<SocketWrap> (info.This ());
 
 	if (info.Length () < 2) {
-		Nan::ThrowError("Two arguments are required");
+		Napi::Error::New(env, "Two arguments are required").ThrowAsJavaScriptException();
+
 		return;
 	}
 	
-	if (! info[0]->IsBoolean ()) {
-		Nan::ThrowTypeError("Recv argument must be a boolean");
-		return;
-	}
-	bool pause_recv = Nan::To<Boolean>(info[0]).ToLocalChecked()->Value();
+	if (! info[0].IsBoolean ()) {
+		Napi::TypeError::New(env, "Recv argument must be a boolean").ThrowAsJavaScriptException();
 
-	if (! info[1]->IsBoolean ()) {
-		Nan::ThrowTypeError("Send argument must be a boolean");
 		return;
 	}
-	bool pause_send = Nan::To<Boolean>(info[1]).ToLocalChecked()->Value();
+	bool pause_recv = info[0].To<Napi::Boolean>()->Value();
+
+	if (! info[1].IsBoolean ()) {
+		Napi::TypeError::New(env, "Send argument must be a boolean").ThrowAsJavaScriptException();
+
+		return;
+	}
+	bool pause_send = info[1].To<Napi::Boolean>()->Value();
 	
 	int events = (pause_recv ? 0 : UV_READABLE)
 			| (pause_send ? 0 : UV_WRITABLE);
@@ -509,14 +540,14 @@ NAN_METHOD(SocketWrap::Pause) {
 			uv_poll_start (socket->poll_watcher_, events, IoEvent);
 	}
 	
-	info.GetReturnValue().Set(info.This());
+	return info.This();
 }
 
-NAN_METHOD(SocketWrap::Recv) {
-	Nan::HandleScope scope;
+Napi::Value SocketWrap::Recv(const Napi::CallbackInfo& info) {
+	Napi::HandleScope scope(env);
 	
 	SocketWrap* socket = SocketWrap::Unwrap<SocketWrap> (info.This ());
-	Local<Object> buffer;
+	Napi::Object buffer;
 	sockaddr_in sin_address;
 	sockaddr_in6 sin6_address;
 	char addr[50];
@@ -532,25 +563,29 @@ NAN_METHOD(SocketWrap::Recv) {
 #endif
 	
 	if (info.Length () < 2) {
-		Nan::ThrowError("Five arguments are required");
+		Napi::Error::New(env, "Five arguments are required").ThrowAsJavaScriptException();
+
 		return;
 	}
 	
 	if (! node::Buffer::HasInstance (info[0])) {
-		Nan::ThrowTypeError("Buffer argument must be a node Buffer object");
+		Napi::TypeError::New(env, "Buffer argument must be a node Buffer object").ThrowAsJavaScriptException();
+
 		return;
 	} else {
-		buffer = Nan::To<Object>(info[0]).ToLocalChecked();
+		buffer = info[0].To<Napi::Object>();
 	}
 
-	if (! info[1]->IsFunction ()) {
-		Nan::ThrowTypeError("Callback argument must be a function");
+	if (! info[1].IsFunction ()) {
+		Napi::TypeError::New(env, "Callback argument must be a function").ThrowAsJavaScriptException();
+
 		return;
 	}
 
 	rc = socket->CreateSocket ();
 	if (rc != 0) {
-		Nan::ThrowError(raw_strerror (errno));
+		Napi::Error::New(env, raw_strerror (errno)).ThrowAsJavaScriptException();
+
 		return;
 	}
 
@@ -567,7 +602,8 @@ NAN_METHOD(SocketWrap::Recv) {
 	}
 	
 	if (rc == SOCKET_ERROR) {
-		Nan::ThrowError(raw_strerror (SOCKET_ERRNO));
+		Napi::Error::New(env, raw_strerror (SOCKET_ERRNO)).ThrowAsJavaScriptException();
+
 		return;
 	}
 	
@@ -576,66 +612,73 @@ NAN_METHOD(SocketWrap::Recv) {
 	else
 		uv_ip4_name (&sin_address, addr, 50);
 	
-	Local<Function> cb = Local<Function>::Cast (info[1]);
+	Napi::Function cb = Napi::Function::Cast (info[1]);
 	const unsigned argc = 3;
-	Local<Value> argv[argc];
+	Napi::Value argv[argc];
 	argv[0] = info[0];
-	argv[1] = Nan::New<Number>(rc);
-	argv[2] = Nan::New(addr).ToLocalChecked();
-	Nan::Call(Nan::Callback(cb), argc, argv);
+	argv[1] = Napi::Number::New(env, rc);
+	argv[2] = Napi::New(env, addr);
+	Napi::Call(Napi::FunctionReference(cb), argc, argv);
 	
-	info.GetReturnValue().Set(info.This());
+	return info.This();
 }
 
-NAN_METHOD(SocketWrap::Send) {
-	Nan::HandleScope scope;
+Napi::Value SocketWrap::Send(const Napi::CallbackInfo& info) {
+	Napi::HandleScope scope(env);
 	
 	SocketWrap* socket = SocketWrap::Unwrap<SocketWrap> (info.This ());
-	Local<Object> buffer;
+	Napi::Object buffer;
 	uint32_t offset;
 	uint32_t length;
 	int rc;
 	char *data;
 	
 	if (info.Length () < 5) {
-		Nan::ThrowError("Five arguments are required");
+		Napi::Error::New(env, "Five arguments are required").ThrowAsJavaScriptException();
+
 		return;
 	}
 	
 	if (! node::Buffer::HasInstance (info[0])) {
-		Nan::ThrowTypeError("Buffer argument must be a node Buffer object");
+		Napi::TypeError::New(env, "Buffer argument must be a node Buffer object").ThrowAsJavaScriptException();
+
 		return;
 	}
 	
-	if (! info[1]->IsUint32 ()) {
-		Nan::ThrowTypeError("Offset argument must be an unsigned integer");
+	if (! info[1].IsUint32 ()) {
+		Napi::TypeError::New(env, "Offset argument must be an unsigned integer").ThrowAsJavaScriptException();
+
 		return;
 	}
 
-	if (! info[2]->IsUint32 ()) {
-		Nan::ThrowTypeError("Length argument must be an unsigned integer");
+	if (! info[2].IsUint32 ()) {
+		Napi::TypeError::New(env, "Length argument must be an unsigned integer").ThrowAsJavaScriptException();
+
 		return;
 	}
 
-	if (! info[3]->IsString ()) {
-		Nan::ThrowTypeError("Address argument must be a string");
+	if (! info[3].IsString ()) {
+		Napi::TypeError::New(env, "Address argument must be a string").ThrowAsJavaScriptException();
+
 		return;
 	}
 
-	if (! info[4]->IsFunction ()) {
-		Nan::ThrowTypeError("Callback argument must be a function");
+	if (! info[4].IsFunction ()) {
+		Napi::TypeError::New(env, "Callback argument must be a function").ThrowAsJavaScriptException();
+
 		return;
 	}
 
 	rc = socket->CreateSocket ();
 	if (rc != 0) {
-		Nan::ThrowError(raw_strerror (errno));
+		Napi::Error::New(env, raw_strerror (errno)).ThrowAsJavaScriptException();
+
 		return;
 	}
 	
-	buffer = Nan::To<Object>(info[0]).ToLocalChecked();
-	offset = Nan::To<Uint32>(info[1]).ToLocalChecked()->Value();
-	length = Nan::To<Uint32>(info[2]).ToLocalChecked()->Value();
+	buffer = info[0].To<Napi::Object>();
+	offset = Napi::To<Uint32>(info[1])->Value();
+	length = Napi::To<Uint32>(info[2])->Value();
 
 	data = node::Buffer::Data (buffer) + offset;
 	
@@ -643,7 +686,7 @@ NAN_METHOD(SocketWrap::Send) {
 #if UV_VERSION_MAJOR > 0
 		struct sockaddr_in6 addr;
 
-		uv_ip6_addr(*Nan::Utf8String(info[3]), 0, &addr);
+		uv_ip6_addr(info[3].As<Napi::String>().Utf8Value().c_str(), 0, &addr);
 #else
 		String::Utf8String address (args[3]);
 		struct sockaddr_in6 addr = uv_ip6_addr (*address, 0);
@@ -654,7 +697,7 @@ NAN_METHOD(SocketWrap::Send) {
 	} else {
 #if UV_VERSION_MAJOR > 0
 		struct sockaddr_in addr;
-		uv_ip4_addr(*Nan::Utf8String(info[3]), 0, &addr);
+		uv_ip4_addr(info[3].As<Napi::String>().Utf8Value().c_str(), 0, &addr);
 #else
 		String::Utf8String address (info[3]);
 		struct sockaddr_in addr = uv_ip4_addr (*address, 0);
@@ -665,72 +708,80 @@ NAN_METHOD(SocketWrap::Send) {
 	}
 	
 	if (rc == SOCKET_ERROR) {
-		Nan::ThrowError(raw_strerror (SOCKET_ERRNO));
+		Napi::Error::New(env, raw_strerror (SOCKET_ERRNO)).ThrowAsJavaScriptException();
+
 		return;
 	}
 	
-	Local<Function> cb = Local<Function>::Cast (info[4]);
+	Napi::Function cb = Napi::Function::Cast (info[4]);
 	const unsigned argc = 1;
-	Local<Value> argv[argc];
-	argv[0] = Nan::New<Number>(rc);
-	Nan::Call(Nan::Callback(cb), argc, argv);
+	Napi::Value argv[argc];
+	argv[0] = Napi::Number::New(env, rc);
+	Napi::Call(Napi::FunctionReference(cb), argc, argv);
 	
-	info.GetReturnValue().Set(info.This());
+	return info.This();
 }
 
-NAN_METHOD(SocketWrap::SetOption) {
-	Nan::HandleScope scope;
+Napi::Value SocketWrap::SetOption(const Napi::CallbackInfo& info) {
+	Napi::HandleScope scope(env);
 	
 	SocketWrap* socket = SocketWrap::Unwrap<SocketWrap> (info.This ());
 	
 	if (info.Length () < 3) {
-		Nan::ThrowError("Three or four arguments are required");
+		Napi::Error::New(env, "Three or four arguments are required").ThrowAsJavaScriptException();
+
 		return;
 	}
 
-	if (! info[0]->IsNumber ()) {
-		Nan::ThrowTypeError("Level argument must be a number");
+	if (! info[0].IsNumber ()) {
+		Napi::TypeError::New(env, "Level argument must be a number").ThrowAsJavaScriptException();
+
 		return;
 	}
 
-	if (! info[1]->IsNumber ()) {
-		Nan::ThrowTypeError("Option argument must be a number");
+	if (! info[1].IsNumber ()) {
+		Napi::TypeError::New(env, "Option argument must be a number").ThrowAsJavaScriptException();
+
 		return;
 	}
 
-	int level = Nan::To<Uint32>(info[0]).ToLocalChecked()->Value();
-	int option = Nan::To<Uint32>(info[1]).ToLocalChecked()->Value();
+	int level = Napi::To<Uint32>(info[0])->Value();
+	int option = Napi::To<Uint32>(info[1])->Value();
 	SOCKET_OPT_TYPE val = NULL;
 	unsigned int ival = 0;
 	SOCKET_LEN_TYPE len;
 
 	if (info.Length () > 3) {
 		if (! node::Buffer::HasInstance (info[2])) {
-			Nan::ThrowTypeError("Value argument must be a node Buffer object if length is provided");
+			Napi::TypeError::New(env, "Value argument must be a node Buffer object if length is provided").ThrowAsJavaScriptException();
+
 			return;
 		}
 		
-		Local<Object> buffer = Nan::To<Object>(info[2]).ToLocalChecked();
+		Napi::Object buffer = info[2].To<Napi::Object>();
 		val = node::Buffer::Data (buffer);
 
-		if (! info[3]->IsInt32 ()) {
-			Nan::ThrowTypeError("Length argument must be an unsigned integer");
+		if (! info[3].IsInt32 ()) {
+			Napi::TypeError::New(env, "Length argument must be an unsigned integer").ThrowAsJavaScriptException();
+
 			return;
 		}
 
-		len = Nan::To<Uint32>(info[3]).ToLocalChecked()->Value();
+		len = Napi::To<Uint32>(info[3])->Value();
 
 		if (len > node::Buffer::Length (buffer)) {
-			Nan::ThrowTypeError("Length argument is larger than buffer length");
+			Napi::TypeError::New(env, "Length argument is larger than buffer length").ThrowAsJavaScriptException();
+
 			return;
 		}
 	} else {
-		if (! info[2]->IsUint32 ()) {
-			Nan::ThrowTypeError("Value argument must be a unsigned integer");
+		if (! info[2].IsUint32 ()) {
+			Napi::TypeError::New(env, "Value argument must be a unsigned integer").ThrowAsJavaScriptException();
+
 			return;
 		}
 
-		ival = Nan::To<Uint32>(info[2]).ToLocalChecked()->Value();
+		ival = Napi::To<Uint32>(info[2])->Value();
 		len = 4;
 	}
 
@@ -738,11 +789,12 @@ NAN_METHOD(SocketWrap::SetOption) {
 			(val ? val : (SOCKET_OPT_TYPE) &ival), len);
 
 	if (rc == SOCKET_ERROR) {
-		Nan::ThrowError(raw_strerror(SOCKET_ERRNO));
+		Napi::Error::New(env, raw_strerror(SOCKET_ERRNO)).ThrowAsJavaScriptException();
+
 		return;
 	}
 	
-	info.GetReturnValue().Set(info.This());
+	return info.This();
 }
 
 static void IoEvent (uv_poll_t* watcher, int status, int revents) {
