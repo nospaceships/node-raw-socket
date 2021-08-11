@@ -624,7 +624,7 @@ Napi::Value SocketWrap::Recv(const Napi::CallbackInfo& info) {
 	Napi::Value argv[argc];
 	argv[0] = info[0];
 	argv[1] = Napi::Number::New(env, rc);
-	argv[2] = Napi::New(env, addr);
+	argv[2] = Napi::String::New(env, addr);
 	cb.Call(std::initializer_list<napi_value>{ argv[0], argv[1], argv[2] });
 	
 	return info.This();
