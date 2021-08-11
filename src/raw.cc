@@ -80,15 +80,15 @@ Napi::Value CreateChecksum(const Napi::CallbackInfo& info) {
 		return env.Undefined();
 	}
 
-	if (! node::Buffer::HasInstance (info[1])) {
+	if (! info[1].IsBuffer()) {
 		Napi::TypeError::New(env, "Buffer argument must be a node Buffer object").ThrowAsJavaScriptException();
 
 		return env.Undefined();
 	}
 	
-	Napi::Object buffer = info[1].As<Napi::Object>();
-	char *data = node::Buffer::Data (buffer);
-	size_t length = node::Buffer::Length (buffer);
+	Napi::Buffer<char> buffer = info[1].As<Napi::Buffer<char> >();
+	char *data = buffer.Data();
+	size_t length = buffer.Length();
 	unsigned int offset = 0;
 	
 	if (info.Length () > 2) {
@@ -401,14 +401,14 @@ Napi::Value SocketWrap::GetOption(const Napi::CallbackInfo& info) {
 	unsigned int ival = 0;
 	SOCKET_LEN_TYPE len;
 
-	if (! node::Buffer::HasInstance (info[2])) {
+	if (! info[2].IsBuffer()) {
 		Napi::TypeError::New(env, "Value argument must be a node Buffer object if length is provided").ThrowAsJavaScriptException();
 
 		return env.Undefined();
 	}
 	
-	Napi::Object buffer = info[2].As<Napi::Object>();
-	val = node::Buffer::Data (buffer);
+	Napi::Buffer<char> buffer = info[2].As<Napi::Buffer<char> >();
+	val = buffer.Data();
 
 	if (! info[3].IsNumber ()) {
 		Napi::TypeError::New(env, "Length argument must be an unsigned integer").ThrowAsJavaScriptException();
@@ -416,7 +416,7 @@ Napi::Value SocketWrap::GetOption(const Napi::CallbackInfo& info) {
 		return env.Undefined();
 	}
 
-	len = (SOCKET_LEN_TYPE) node::Buffer::Length (buffer);
+	len = (SOCKET_LEN_TYPE) buffer.Length();
 
 	int rc = getsockopt (socket->poll_fd_, level, option,
 			(val ? val : (SOCKET_OPT_TYPE) &ival), &len);
@@ -557,8 +557,8 @@ Napi::Value SocketWrap::Recv(const Napi::CallbackInfo& info) {
 	Napi::Env env = info.Env();
 	Napi::HandleScope scope(env);
 	
-	SocketWrap* socket = SocketWrap::Unwrap<SocketWrap> (info.This ());
-	Napi::Object buffer;
+	SocketWrap* socket = this;
+	Napi::Buffer<char> buffer;
 	sockaddr_in sin_address;
 	sockaddr_in6 sin6_address;
 	char addr[50];
@@ -579,12 +579,12 @@ Napi::Value SocketWrap::Recv(const Napi::CallbackInfo& info) {
 		return env.Undefined();
 	}
 	
-	if (! node::Buffer::HasInstance (info[0])) {
+	if (! info[0].IsBuffer()) {
 		Napi::TypeError::New(env, "Buffer argument must be a node Buffer object").ThrowAsJavaScriptException();
 
 		return env.Undefined();
 	} else {
-		buffer = info[0].As<Napi::Object>();
+		buffer = info[0].As<Napi::Buffer<char> >();
 	}
 
 	if (! info[1].IsFunction ()) {
@@ -602,13 +602,13 @@ Napi::Value SocketWrap::Recv(const Napi::CallbackInfo& info) {
 
 	if (socket->family_ == AF_INET6) {
 		memset (&sin6_address, 0, sizeof (sin6_address));
-		rc = recvfrom (socket->poll_fd_, node::Buffer::Data (buffer),
-				(int) node::Buffer::Length (buffer), 0, (sockaddr *) &sin6_address,
+		rc = recvfrom (socket->poll_fd_, buffer.Data(),
+				(int) buffer.Length(), 0, (sockaddr *) &sin6_address,
 				&sin_length);
 	} else {
 		memset (&sin_address, 0, sizeof (sin_address));
-		rc = recvfrom (socket->poll_fd_, node::Buffer::Data (buffer),
-				(int) node::Buffer::Length (buffer), 0, (sockaddr *) &sin_address,
+		rc = recvfrom (socket->poll_fd_, buffer.Data(),
+				(int) buffer.Length(), 0, (sockaddr *) &sin_address,
 				&sin_length);
 	}
 	
@@ -639,7 +639,7 @@ Napi::Value SocketWrap::Send(const Napi::CallbackInfo& info) {
 	Napi::HandleScope scope(env);
 	
 	SocketWrap* socket = this;
-	Napi::Object buffer;
+	Napi::Buffer<char> buffer;
 	uint32_t offset;
 	uint32_t length;
 	int rc;
@@ -651,7 +651,7 @@ Napi::Value SocketWrap::Send(const Napi::CallbackInfo& info) {
 		return env.Undefined();
 	}
 	
-	if (! node::Buffer::HasInstance (info[0])) {
+	if (! info[0].IsBuffer()) {
 		Napi::TypeError::New(env, "Buffer argument must be a node Buffer object").ThrowAsJavaScriptException();
 
 		return env.Undefined();
@@ -688,11 +688,11 @@ Napi::Value SocketWrap::Send(const Napi::CallbackInfo& info) {
 		return env.Undefined();
 	}
 	
-	buffer = info[0].As<Napi::Object>();
+	buffer = info[0].As<Napi::Buffer<char> >();
 	offset = info[1].As<Napi::Number>();
 	length = info[2].As<Napi::Number>();
 
-	data = node::Buffer::Data (buffer) + offset;
+	data = buffer.Data() + offset;
 	
 	if (socket->family_ == AF_INET6) {
 #if UV_VERSION_MAJOR > 0
@@ -765,14 +765,14 @@ Napi::Value SocketWrap::SetOption(const Napi::CallbackInfo& info) {
 	SOCKET_LEN_TYPE len;
 
 	if (info.Length () > 3) {
-		if (! node::Buffer::HasInstance (info[2])) {
+		if (! info[2].IsBuffer()) {
 			Napi::TypeError::New(env, "Value argument must be a node Buffer object if length is provided").ThrowAsJavaScriptException();
 
 			return env.Undefined();
 		}
 		
-		Napi::Object buffer = info[2].As<Napi::Object>();
-		val = node::Buffer::Data (buffer);
+		Napi::Buffer<char> buffer = info[2].As<Napi::Buffer<char> >();
+		val = buffer.Data();
 
 		if (! info[3].IsNumber ()) {
 			Napi::TypeError::New(env, "Length argument must be an unsigned integer").ThrowAsJavaScriptException();
@@ -782,7 +782,7 @@ Napi::Value SocketWrap::SetOption(const Napi::CallbackInfo& info) {
 
 		len = info[3].As<Napi::Number>();
 
-		if (len > node::Buffer::Length (buffer)) {
+		if (len > buffer.Length()) {
 			Napi::TypeError::New(env, "Length argument is larger than buffer length").ThrowAsJavaScriptException();
 
 			return env.Undefined();
