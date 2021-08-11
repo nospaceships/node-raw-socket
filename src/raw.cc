@@ -427,7 +427,12 @@ Napi::Value SocketWrap::GetOption(const Napi::CallbackInfo& info) {
 	return got;
 }
 
+Napi::Value SocketWrap::handle() {
+	return Value();
+}
+
 void SocketWrap::HandleIOEvent (int status, int revents) {
+	Napi::Env env = Env();
 	Napi::HandleScope scope(env);
 
 	if (status) {

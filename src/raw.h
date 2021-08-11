@@ -86,6 +86,8 @@ private:
 	Napi::Value Send(const Napi::CallbackInfo& info);
 	Napi::Value SetOption(const Napi::CallbackInfo& info);
 
+	Napi::Value handle();
+
 	bool no_ip_header_;
 
 	uint32_t family_;
