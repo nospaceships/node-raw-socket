@@ -305,11 +305,10 @@ Napi::Value SocketWrap::Close(const Napi::CallbackInfo& info) {
 	Napi::Value args[1];
 	args[0] = Napi::String::New(env, "close");
 
-	Napi::Call(Napi::String::New(env, "emit"), info.This(), 1, args);
+	Napi::Value(info.This().As<Napi::Object>()["emit"]).As<Napi::Function>().Call(info.This(), std::initializer_list<napi_value>{ args[0] });
 
 	return info.This();
 }
-
 void SocketWrap::CloseSocket (void) {
 	if (this->poll_initialised_) {
 		uv_close ((uv_handle_t *) this->poll_watcher_, OnClose);
@@ -447,9 +446,10 @@ void SocketWrap::HandleIOEvent (int status, int revents) {
 		 **/
 		char status_str[32];
 		sprintf(status_str, "%d", status);
-		args[1] = Napi::Error::New(env, status_str);
+		Napi::Error error = Napi::Error::New(env, status_str);
+		args[1] = error.Value();
 
-		Napi::Call(Napi::String::New(env, "emit"), handle(), 1, args);
+		Napi::Value(handle().As<Napi::Object>()["emit"]).As<Napi::Function>().Call(handle(), std::initializer_list<napi_value>{ args[0] });
 	} else {
 		Napi::Value args[1];
 		if (revents & UV_READABLE)
@@ -457,7 +457,7 @@ void SocketWrap::HandleIOEvent (int status, int revents) {
 		else
 			args[0] = Napi::String::New(env, "sendReady");
 
-		Napi::Call(Napi::String::New(env, "emit"), handle(), 1, args);
+		Napi::Value(handle().As<Napi::Object>()["emit"]).As<Napi::Function>().Call(handle(), std::initializer_list<napi_value>{ args[0] });
 	}
 }
 
@@ -619,13 +619,13 @@ Napi::Value SocketWrap::Recv(const Napi::CallbackInfo& info) {
 	else
 		uv_ip4_name (&sin_address, addr, 50);
 	
-	Napi::Function cb = Napi::Function::Cast (info[1]);
+	Napi::Function cb = info[1].As<Napi::Function>();
 	const unsigned argc = 3;
 	Napi::Value argv[argc];
 	argv[0] = info[0];
 	argv[1] = Napi::Number::New(env, rc);
 	argv[2] = Napi::New(env, addr);
-	Napi::Call(Napi::FunctionReference(cb), argc, argv);
+	cb.Call(std::initializer_list<napi_value>{ argv[0], argv[1], argv[2] });
 	
 	return info.This();
 }
@@ -721,12 +721,12 @@ Napi::Value SocketWrap::Send(const Napi::CallbackInfo& info) {
 		return env.Undefined();
 	}
 	
-	Napi::Function cb = Napi::Function::Cast (info[4]);
+	Napi::Function cb = info[4].As<Napi::Function>();
 	const unsigned argc = 1;
 	Napi::Value argv[argc];
 	argv[0] = Napi::Number::New(env, rc);
-	Napi::Call(Napi::FunctionReference(cb), argc, argv);
 	
+	cb.Call(std::initializer_list<napi_value>{ argv[0] });
 	return info.This();
 }
 
