@@ -275,23 +275,18 @@ void ExportFunctions (Napi::Env env, Napi::Object target) {
 void SocketWrap::Init (Napi::Env env, Napi::Object exports) {
 	Napi::HandleScope scope(env);
 
-	Napi::FunctionReference tpl = Napi::Persistent(Napi::Function::New(env, SocketWrap::New));
-	tpl.Value().SetClassName(Napi::String::New(env, "SocketWrap"));
+	Napi::Function tpl = DefineClass(env, "SocketWrap", {
+			InstanceMethod<&SocketWrap::Close>("close"),
+			InstanceMethod<&SocketWrap::GetOption>("getOption"),
+			InstanceMethod<&SocketWrap::Pause>("pause"),
+			InstanceMethod<&SocketWrap::Recv>("recv"),
+			InstanceMethod<&SocketWrap::Send>("send"),
+			InstanceMethod<&SocketWrap::SetOption>("setOption")
+	});
+	SocketWrap_constructor = Napi::Persistent(tpl);
+	SocketWrap_constructor.SuppressDestruct();
 
-
-	InstanceMethod("close", &Close);
-	InstanceMethod("getOption", &GetOption);
-	InstanceMethod("pause", &Pause);
-	InstanceMethod("recv", &Recv);
-	InstanceMethod("send", &Send);
-	InstanceMethod("setOption", &SetOption);
-
-	SocketWrap_constructor.Reset(tpl);
 	(exports).Set(Napi::String::New(env, "SocketWrap"), tpl);
-}
-
-SocketWrap::SocketWrap () {
-	deconstructing_ = false;
 }
 
 SocketWrap::~SocketWrap () {
@@ -303,7 +298,7 @@ Napi::Value SocketWrap::Close(const Napi::CallbackInfo& info) {
 	Napi::Env env = info.Env();
 	Napi::HandleScope scope(env);
 	
-	SocketWrap* socket = SocketWrap::Unwrap<SocketWrap> (info.This ());
+	SocketWrap* socket = this;
 	
 	socket->CloseSocket ();
 
@@ -375,7 +370,7 @@ Napi::Value SocketWrap::GetOption(const Napi::CallbackInfo& info) {
 	Napi::Env env = info.Env();
 	Napi::HandleScope scope(env);
 	
-	SocketWrap* socket = SocketWrap::Unwrap<SocketWrap> (info.This ());
+	SocketWrap* socket = this;
 	
 	if (info.Length () < 3) {
 		Napi::Error::New(env, "Three arguments are required").ThrowAsJavaScriptException();
@@ -461,23 +456,23 @@ void SocketWrap::HandleIOEvent (int status, int revents) {
 	}
 }
 
-Napi::Value SocketWrap::New(const Napi::CallbackInfo& info) {
+SocketWrap::SocketWrap(const Napi::CallbackInfo& info) : Napi::ObjectWrap<SocketWrap>(info), deconstructing_(false) {
 	Napi::Env env = info.Env();
 	Napi::HandleScope scope(env);
 	
-	SocketWrap* socket = new SocketWrap ();
+	SocketWrap* socket = this;
 	int rc, family = AF_INET;
 	
 	if (info.Length () < 1) {
 		Napi::Error::New(env, "One argument is required").ThrowAsJavaScriptException();
 
-		return env.Undefined();
+		return;
 	}
 	
 	if (! info[0].IsNumber ()) {
 		Napi::TypeError::New(env, "Protocol argument must be an unsigned integer").ThrowAsJavaScriptException();
 
-		return env.Undefined();
+		return;
 	} else {
 		socket->protocol_ = info[0].As<Napi::Number>();
 	}
@@ -486,7 +481,7 @@ Napi::Value SocketWrap::New(const Napi::CallbackInfo& info) {
 		if (! info[1].IsNumber ()) {
 			Napi::TypeError::New(env, "Address family argument must be an unsigned integer").ThrowAsJavaScriptException();
 
-			return env.Undefined();
+			return;
 		} else {
 			if (uint32_t(info[1].As<Napi::Number>()) == 2)
 				family = AF_INET6;
@@ -503,12 +498,8 @@ Napi::Value SocketWrap::New(const Napi::CallbackInfo& info) {
 	if (rc != 0) {
 		Napi::Error::New(env, raw_strerror (rc)).ThrowAsJavaScriptException();
 
-		return env.Undefined();
+		return;
 	}
-
-	socket->Wrap (info.This ());
-
-	return info.This();
 }
 
 void SocketWrap::OnClose (uv_handle_t *handle) {
@@ -519,7 +510,7 @@ Napi::Value SocketWrap::Pause(const Napi::CallbackInfo& info) {
 	Napi::Env env = info.Env();
 	Napi::HandleScope scope(env);
 	
-	SocketWrap* socket = SocketWrap::Unwrap<SocketWrap> (info.This ());
+	SocketWrap* socket = this;
 
 	if (info.Length () < 2) {
 		Napi::Error::New(env, "Two arguments are required").ThrowAsJavaScriptException();
@@ -738,7 +729,7 @@ Napi::Value SocketWrap::SetOption(const Napi::CallbackInfo& info) {
 	Napi::Env env = info.Env();
 	Napi::HandleScope scope(env);
 	
-	SocketWrap* socket = SocketWrap::Unwrap<SocketWrap> (info.This ());
+	SocketWrap* socket = this;
 	
 	if (info.Length () < 3) {
 		Napi::Error::New(env, "Three or four arguments are required").ThrowAsJavaScriptException();

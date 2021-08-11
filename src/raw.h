@@ -63,29 +63,28 @@ Napi::Value Ntohs(const Napi::CallbackInfo& info);
 
 class SocketWrap : public Napi::ObjectWrap<SocketWrap> {
 public:
+	SocketWrap(const Napi::CallbackInfo& info);
+	virtual ~SocketWrap ();
+
 	void HandleIOEvent (int status, int revents);
 	static void Init (Napi::Env env, Napi::Object exports);
 
-private:
-	SocketWrap ();
-	~SocketWrap ();
 
-	static Napi::Value Close(const Napi::CallbackInfo& info);
+private:
+	Napi::Value Close(const Napi::CallbackInfo& info);
 
 	void CloseSocket (void);
 	
 	int CreateSocket (void);
 
-	static Napi::Value GetOption(const Napi::CallbackInfo& info);
-
-	static Napi::Value New(const Napi::CallbackInfo& info);
+	Napi::Value GetOption(const Napi::CallbackInfo& info);
 
 	static void OnClose (uv_handle_t *handle);
 
-	static Napi::Value Pause(const Napi::CallbackInfo& info);
-	static Napi::Value Recv(const Napi::CallbackInfo& info);
-	static Napi::Value Send(const Napi::CallbackInfo& info);
-	static Napi::Value SetOption(const Napi::CallbackInfo& info);
+	Napi::Value Pause(const Napi::CallbackInfo& info);
+	Napi::Value Recv(const Napi::CallbackInfo& info);
+	Napi::Value Send(const Napi::CallbackInfo& info);
+	Napi::Value SetOption(const Napi::CallbackInfo& info);
 
 	bool no_ip_header_;
 
