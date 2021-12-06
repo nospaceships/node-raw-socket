@@ -1,3 +1,5 @@
+import { EventEmitter } from 'events';
+
 export interface SOptions {
 	bufferSize?: number,
 	addressFamily?: number,
