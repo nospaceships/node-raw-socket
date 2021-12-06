@@ -1,26 +1,25 @@
-
-var raw = require ("../");
+var raw = require('../');
 
 if (process.argv.length < 4) {
-	console.log ("node get-option <name> <option>");
-	process.exit (-1);
+  console.log('node get-option <name> <option>');
+  process.exit(-1);
 }
 
 var level = process.argv[2];
 var option = process.argv[3];
 
-level = raw.SocketLevel[level] || parseInt (level);
-option = raw.SocketOption[option] || parseInt (option);
+level = raw.SocketLevel[level] || parseInt(level);
+option = raw.SocketOption[option] || parseInt(option);
 
 var options = {
-	protocol: raw.Protocol.ICMP
+  protocol: raw.Protocol.ICMP,
 };
 
-var socket = raw.createSocket (options);
+var socket = raw.createSocket(options);
 
 var buffer = Buffer.alloc(4096);
-var len = socket.getOption (level, option, buffer, buffer.length);
+var len = socket.getOption(level, option, buffer, buffer.length);
 
-socket.pauseSend ().pauseRecv ();
+socket.pauseSend().pauseRecv();
 
-console.log (buffer.toString ("hex", 0, len));
+console.log(buffer.toString('hex', 0, len));
