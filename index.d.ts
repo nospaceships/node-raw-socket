@@ -86,7 +86,7 @@ export class Socket extends EventEmitter {
     // eslint-disable-next-line @typescript-eslint/ban-types
     beforeCallback: Function,
     // eslint-disable-next-line @typescript-eslint/ban-types
-    afterCallback: Function,
+    afterCallback?: Function,
   ): Socket;
 
   setOption(
