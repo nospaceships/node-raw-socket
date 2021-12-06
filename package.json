@@ -6,6 +6,10 @@
   "directories": {
     "example": "example"
   },
+  "scripts": {
+    "build": "node-gyp configure build",
+    "prepare": "npm run build"
+  },
   "dependencies": {
     "nan": "2.14.*"
   },
@@ -17,11 +21,15 @@
     {
       "name": "NoSpaceships Ltd",
       "email": "hello@nospaceships.com"
+    },
+    {
+      "name": "Nathanael Demacon",
+      "email": "nathanael.dmc@outlook.fr"
     }
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/nospaceships/node-raw-socket.git"
+    "url": "git://github.com/quantumsheep/node-raw-socket.git"
   },
   "keywords": [
     "checksum",
@@ -39,5 +47,8 @@
     "sockets"
   ],
   "author": "NoSpaceships Ltd <hello@nospaceships.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "node-gyp": "^8.4.1"
+  }
 }
