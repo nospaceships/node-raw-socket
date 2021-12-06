@@ -39,7 +39,7 @@ export class SocketWrap {
 }
 
 export declare interface Socket {
-  on(event: 'close'): this;
+  on(event: 'close', listener: () => void): this;
   on(event: 'error', listener: (error: string) => void): this;
   on(
     event: 'message',
