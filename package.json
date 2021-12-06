@@ -1,7 +1,7 @@
 {
-  "name": "raw-socket",
+  "name": "raw-socket-ts",
   "version": "1.7.0",
-  "description": "Raw sockets for Node.js.",
+  "description": "Raw sockets for Node.js with TypeScript typing.",
   "main": "index.js",
   "directories": {
     "example": "example"
