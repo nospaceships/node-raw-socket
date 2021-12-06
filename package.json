@@ -7,7 +7,7 @@
     "example": "example"
   },
   "scripts": {
-    "lint": "eslint src/**/*.ts --fix",
+    "lint": "eslint **/*.js **/*.ts --fix",
     "build": "node-gyp configure build",
     "prepare": "npm run build"
   },
