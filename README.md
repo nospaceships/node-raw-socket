@@ -9,9 +9,7 @@ _This module has been created primarily to facilitate implementation of the
 
 This module is installed using [node package manager (npm)][npm]:
 
-    # This module contains C++ source code which will be compiled
-    # during installation using node-gyp.  A suitable build chain
-    # must be configured before installation.
+This module contains C++ source code which will be compiled during installation using node-gyp. A suitable build chain must be configured before installation.
 
 ```shell
 npm install raw-socket-ts
