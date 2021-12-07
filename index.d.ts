@@ -87,10 +87,16 @@ export class Socket extends EventEmitter {
     offset: number,
     length: number,
     address: any,
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    beforeCallback: Function,
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    afterCallback?: Function,
+    afterCallback: (error: Error | null, bytes?: number) => void,
+  ): Socket;
+
+  send(
+    buffer: Buffer,
+    offset: number,
+    length: number,
+    address: any,
+    beforeCallback: () => void,
+    afterCallback: (error: Error | null, bytes?: number) => void,
   ): Socket;
 
   setOption(
