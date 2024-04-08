@@ -707,6 +707,10 @@ Example programs are included under the modules `example` directory.
 
  * Support Node.js 12 using nan 2.14
 
+## Version 1.8.1 - 08/04/2024
+
+ * Use nan 2.19.* to support up to Node.js 21
+
 # License
 
 Copyright (c) 2018 NoSpaceships Ltd <hello@nospaceships.com>
